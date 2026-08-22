@@ -268,6 +268,12 @@
       overflow: hidden;
     }
 
+    .user-details {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
     .avatar {
       width: clamp(28px, 2.5vw, 32px);
       height: clamp(28px, 2.5vw, 32px);
@@ -283,10 +289,18 @@
       object-fit: cover;
     }
 
-    .username {
+    .display-name {
       font-size: clamp(0.78rem, 0.85vw, 0.88rem);
       font-weight: 600;
       color: var(--text-heading);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .username-handle {
+      font-size: clamp(0.68rem, 0.75vw, 0.78rem);
+      color: var(--text-muted);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -430,7 +444,7 @@
       
       <div class="login-input-group">
         <label for="roblox-username">Roblox Username</label>
-        <input type="text" id="roblox-username" placeholder="Enter your username (for profile pic)" />
+        <input type="text" id="roblox-username" placeholder="Enter your username" />
       </div>
 
       <div class="login-input-group">
@@ -472,7 +486,10 @@
           <div class="user-info">
             <img class="avatar" id="sidebar-avatar-img" src="" style="display: none;" />
             <div class="avatar" id="sidebar-avatar-text">R</div>
-            <span class="username nav-text" id="sidebar-username">Authenticated User</span>
+            <div class="user-details nav-text">
+              <span class="display-name" id="sidebar-displayname">User</span>
+              <span class="username-handle" id="sidebar-username">@username</span>
+            </div>
           </div>
           <button class="btn-logout" onclick="handleLogout()" title="Logout">✕</button>
         </div>
@@ -554,6 +571,18 @@
     const WORKER_URL = 'https://ezpublishserv.acc943132.workers.dev/';
     let USER_COOKIE = "";
 
+    // --- AUTO-LOGIN CHECK ON LOAD ---
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedCookie = localStorage.getItem('sc_cookie');
+      const savedUsername = localStorage.getItem('sc_username');
+
+      if (savedCookie && savedUsername) {
+        document.getElementById('security-cookie').value = savedCookie;
+        document.getElementById('roblox-username').value = savedUsername;
+        handleLogin(true); // Auto-login silently
+      }
+    });
+
     // --- HELPER FUNCTIONS ---
     const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -588,7 +617,7 @@
     }
 
     // --- AUTHENTICATION ---
-    async function handleLogin() {
+    async function handleLogin(isAutoLogin = false) {
       const usernameInput = document.getElementById('roblox-username').value.trim();
       const cookieInput = document.getElementById('security-cookie').value.trim();
 
@@ -608,7 +637,7 @@
       loginBtn.disabled = true;
 
       try {
-        // Fetch User ID via proxy
+        // Fetch User ID & Real Name via proxy
         const userRes = await fetch("https://users.roproxy.com/v1/usernames/users", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -632,8 +661,9 @@
         const thumbRes = await fetch(`https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
         const thumbData = await thumbRes.json();
         
-        // Update Sidebar UI
-        document.getElementById('sidebar-username').innerText = displayName || actualName;
+        // Update Sidebar UI with Display Name and Real Username (@username)
+        document.getElementById('sidebar-displayname').innerText = displayName;
+        document.getElementById('sidebar-username').innerText = `@${actualName}`;
         
         const avatarImg = document.getElementById('sidebar-avatar-img');
         const avatarText = document.getElementById('sidebar-avatar-text');
@@ -649,21 +679,29 @@
         }
 
         USER_COOKIE = cookieInput;
+
+        // Save session in LocalStorage
+        localStorage.setItem('sc_cookie', cookieInput);
+        localStorage.setItem('sc_username', usernameInput);
         
         // Switch UI
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('dashboardLayout').style.display = 'flex';
         
-        notify(`Welcome, ${displayName || actualName}!`, "success");
-        appendLog(`User ${actualName} logged in with .ROBLOSECURITY cookie.`, "SUCCESS");
+        if (!isAutoLogin) notify(`Welcome back, ${displayName}!`, "success");
+        appendLog(`User ${actualName} (@${actualName}) authenticated successfully.`, "SUCCESS");
 
       } catch (err) {
-        notify("Failed to fetch profile picture (CORS/Network error).", "warning");
+        notify("Failed to fetch profile info. Check internet connection.", "warning");
         appendLog(`Profile Fetch Error: ${err.message}`, "WARN");
         
-        // Fallback login if proxy fails
+        // Fallback login
         USER_COOKIE = cookieInput;
-        document.getElementById('sidebar-username').innerText = usernameInput;
+        localStorage.setItem('sc_cookie', cookieInput);
+        localStorage.setItem('sc_username', usernameInput);
+
+        document.getElementById('sidebar-displayname').innerText = usernameInput;
+        document.getElementById('sidebar-username').innerText = `@${usernameInput}`;
         document.getElementById('sidebar-avatar-img').style.display = "none";
         document.getElementById('sidebar-avatar-text').style.display = "flex";
         document.getElementById('sidebar-avatar-text').innerText = usernameInput.charAt(0).toUpperCase();
@@ -679,6 +717,11 @@
 
     function handleLogout() {
       USER_COOKIE = "";
+      
+      // Clear saved session
+      localStorage.removeItem('sc_cookie');
+      localStorage.removeItem('sc_username');
+
       document.getElementById('security-cookie').value = "";
       document.getElementById('roblox-username').value = "";
       
@@ -687,7 +730,7 @@
       document.getElementById('loginScreen').style.display = 'flex';
       
       notify("Logged out successfully.", "info");
-      appendLog("User logged out.", "INFO");
+      appendLog("User logged out and session cleared.", "INFO");
     }
 
     // --- UI & NAVIGATION ---
