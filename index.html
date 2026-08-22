@@ -156,6 +156,39 @@
       font-weight: 500;
     }
 
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      color: var(--text-heading);
+      font-size: 0.9rem;
+      margin-top: 5px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--blue);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+    }
+
     /* --- DASHBOARD LAYOUT --- */
     .dashboard-layout {
       display: none; 
@@ -176,11 +209,6 @@
       flex-shrink: 0;
     }
 
-    .sidebar.collapsed {
-      width: clamp(50px, 5vw, 64px);
-      min-width: 50px;
-    }
-
     .sidebar-header {
       padding: clamp(12px, 1.5vh, 18px);
       display: flex;
@@ -196,21 +224,6 @@
       display: flex;
       align-items: center;
       gap: 10px;
-    }
-
-    .toggle-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: clamp(1rem, 1.2vw, 1.3rem);
-      cursor: pointer;
-      padding: 6px 8px;
-      border-radius: var(--radius);
-    }
-
-    .toggle-btn:hover {
-      background: var(--bg-card);
-      color: var(--text-heading);
     }
 
     .menu {
@@ -261,32 +274,10 @@
       border: 1px solid var(--border-color);
     }
 
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      overflow: hidden;
-    }
-
     .user-details {
       display: flex;
       flex-direction: column;
       overflow: hidden;
-    }
-
-    .avatar {
-      width: clamp(28px, 2.5vw, 32px);
-      height: clamp(28px, 2.5vw, 32px);
-      border-radius: 50%;
-      background: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 0.85rem;
-      color: #fff;
-      flex-shrink: 0;
-      object-fit: cover;
     }
 
     .display-name {
@@ -304,19 +295,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    .btn-logout {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: color 0.2s;
-    }
-
-    .btn-logout:hover {
-      color: var(--danger);
     }
 
     /* --- MAIN CONTENT AREA --- */
@@ -364,567 +342,240 @@
     }
 
     label {
-      display: flex;
-      justify-content: space-between;
-      font-size: clamp(0.78rem, 0.85vw, 0.88rem);
+      display: block;
+      font-size: 0.85rem;
       color: var(--text-heading);
       margin-bottom: 6px;
-      font-weight: 500;
     }
 
-    .badge-req { color: var(--danger); font-size: 0.75rem; }
-    .badge-opt { color: var(--text-muted); font-size: 0.75rem; }
-
-    input[type="text"],
-    input[type="number"],
-    input[type="password"],
-    input[type="file"] {
-      width: 100%;
-      padding: clamp(8px, 1vh, 11px) 12px;
-      background: var(--bg-main);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      color: var(--text-heading);
-      font-size: clamp(0.82rem, 0.9vw, 0.92rem);
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    input[type="file"] {
-      padding: 8px;
-      cursor: pointer;
-    }
-
-    input:focus {
-      border-color: var(--blue);
-    }
-
-    .btn-action {
-      width: 100%;
-      padding: clamp(10px, 1.2vh, 14px);
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius);
-      font-weight: 600;
-      font-size: clamp(0.85rem, 0.95vw, 0.98rem);
-      cursor: pointer;
-      margin-top: 10px;
-      transition: background 0.2s;
-    }
-
-    .btn-action:hover {
-      background: var(--primary-hover);
-    }
-
-    .btn-action:disabled {
-      background: #2ea04366;
-      cursor: not-allowed;
-    }
-
+    /* Logs Console */
     .console-box {
-      background: var(--bg-main);
+      margin-top: 24px;
+      background: #000;
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
       padding: 16px;
+      height: 180px;
+      overflow-y: auto;
       font-family: monospace;
       font-size: 0.85rem;
-      color: #7ee787;
-      height: clamp(250px, 45vh, 450px);
-      overflow-y: auto;
-      white-space: pre-wrap;
+      color: #39ff14;
     }
+
+    .console-line {
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .console-line.error { color: #ff4444; }
+    .console-line.info { color: #00d2ff; }
   </style>
 </head>
 <body>
 
-  <!-- TOAST NOTIFICATIONS -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- LOGIN SCREEN -->
+  <!-- TELA DE LOGIN -->
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
       <div class="login-icon">☁️</div>
       <h2>Studio Cloud</h2>
-      <p>Enter your Roblox Cookie to log in automatically.</p>
-
+      <p>Gerencie o catálogo do seu jogo remotamente usando autenticação segura por cookie.</p>
+      
       <div class="login-input-group">
-        <label for="security-cookie">.ROBLOSECURITY Cookie</label>
-        <input type="password" id="security-cookie" placeholder="_|WARNING:-DO-NOT-SHARE-THIS..." />
+        <label>URL do Cloudflare Worker</label>
+        <input type="text" id="workerUrlInput" placeholder="https://workers.dev" />
       </div>
 
-      <button class="btn-action" id="btn-login" onclick="handleLogin()">Authenticate</button>
+      <div class="login-input-group">
+        <label>.ROBLOSECURITY Cookie</label>
+        <input type="password" id="cookieInput" placeholder="Cole seu cookie completo aqui" />
+      </div>
+
+      <button id="btnLogin" onclick="handleLogin()">Autenticar Painel</button>
     </div>
   </div>
 
-  <!-- MAIN DASHBOARD -->
+  <!-- DASHBOARD PRINCIPAL -->
   <div class="dashboard-layout" id="dashboardLayout">
-    <aside class="sidebar" id="sidebar">
+    <div class="sidebar">
       <div class="sidebar-header">
-        <div class="brand-title">
-          <span>☁️</span> <span class="nav-text">Studio Cloud</span>
-        </div>
-        <button class="toggle-btn" id="toggleSidebar" title="Toggle Sidebar">☰</button>
+        <div class="brand-title"><span>☁️</span> Studio Cloud</div>
       </div>
-
       <ul class="menu">
-        <li class="menu-item active" onclick="switchPage('create-place', this)">
-          <span class="icon">➕</span>
-          <span class="nav-text">Create Place</span>
-        </li>
-        <li class="menu-item" onclick="switchPage('create-universe', this)">
-          <span class="icon">🌌</span>
-          <span class="nav-text">Create Universe</span>
-        </li>
-        <li class="menu-item" onclick="switchPage('upload-asset', this)">
-          <span class="icon">📦</span>
-          <span class="nav-text">Upload Asset</span>
-        </li>
-        <li class="menu-item" onclick="switchPage('console-logs', this)">
-          <span class="icon">📟</span>
-          <span class="nav-text">Console Logs</span>
+        <li class="menu-item active" onclick="switchPage('uploadPage')">
+          <span class="icon">📦</span> Upload Asset
         </li>
       </ul>
-
       <div class="sidebar-footer">
         <div class="user-profile">
-          <div class="user-info">
-            <img class="avatar" id="sidebar-avatar-img" src="" style="display: none;" />
-            <div class="avatar" id="sidebar-avatar-text">R</div>
-            <div class="user-details nav-text">
-              <span class="display-name" id="sidebar-displayname">User</span>
-              <span class="username-handle" id="sidebar-username">@username</span>
-            </div>
+          <div class="user-details">
+            <span class="display-name" id="userDisplayName">Carregando...</span>
+            <span class="username-handle" id="userHandle">@roblox</span>
           </div>
-          <button class="btn-logout" onclick="handleLogout()" title="Logout">✕</button>
         </div>
       </div>
-    </aside>
+    </div>
 
-    <main class="main-content">
-      
-      <!-- CREATE PLACE PAGE -->
-      <section id="create-place" class="page active">
-        <h1 class="page-title">Create Place</h1>
-        <p class="page-subtitle">Add a new place to an existing Roblox Universe.</p>
-
-        <div class="card">
-          <div class="form-group">
-            <label>Universe ID <span class="badge-req">Required</span></label>
-            <input type="text" id="place-universe-id" placeholder="e.g. 123456789" />
-          </div>
-
-          <div class="form-group">
-            <label>Template ID (Uncopylocked) <span class="badge-opt">Optional</span></label>
-            <input type="text" id="place-template-id" value="95206881" placeholder="95206881 (Baseplate)" />
-          </div>
-
-          <div class="form-group">
-            <label>Number to Create <span class="badge-opt">Optional</span></label>
-            <input type="number" id="place-count" value="1" min="1" max="100" />
-          </div>
-
-          <div class="form-group">
-            <label>Delay Between Requests (seconds) <span class="badge-opt">Optional</span></label>
-            <input type="number" id="place-delay" value="1.0" min="0" step="0.5" />
-          </div>
-
-          <button class="btn-action" id="btn-create-place" onclick="handleCreatePlace()">Execute Create Place</button>
-        </div>
-      </section>
-
-      <!-- CREATE UNIVERSE PAGE -->
-      <section id="create-universe" class="page">
-        <h1 class="page-title">Create Universe</h1>
-        <p class="page-subtitle">Generate new Roblox Universes automatically.</p>
+    <div class="main-content">
+      <!-- ABA: UPLOAD ASSET -->
+      <div class="page active" id="uploadPage">
+        <h1 class="page-title">Upload de Modelos (.rbxm / .rbxl)</h1>
+        <p class="page-subtitle">Envie seus arquivos de modelo diretamente para o inventário ou grupo.</p>
 
         <div class="card">
           <div class="form-group">
-            <label>Template ID (Uncopylocked) <span class="badge-opt">Optional</span></label>
-            <input type="text" id="universe-template-id" value="95206881" placeholder="95206881 (Baseplate)" />
+            <label>Nome do Asset</label>
+            <input type="text" id="assetNameInput" placeholder="Ex: MeuModeloIncrível" />
           </div>
 
           <div class="form-group">
-            <label>Number to Create <span class="badge-opt">Optional</span></label>
-            <input type="number" id="universe-count" value="1" min="1" max="100" />
+            <label>Group ID (Opcional - Deixe 0 para perfil pessoal)</label>
+            <input type="text" id="groupIdInput" value="0" placeholder="0" />
           </div>
 
           <div class="form-group">
-            <label>Delay Between Requests (seconds) <span class="badge-opt">Optional</span></label>
-            <input type="number" id="universe-delay" value="1.0" min="0" step="0.5" />
+            <label>Arquivo do Modelo (.rbxm ou .rbxl)</label>
+            <input type="file" id="fileInput" accept=".rbxm, .rbxl" />
           </div>
 
-          <button class="btn-action" id="btn-create-universe" onclick="handleCreateUniverse()">Execute Create Universe</button>
+          <button onclick="handleUpload()">Iniciar Upload</button>
         </div>
-      </section>
 
-      <!-- UPLOAD ASSET PAGE -->
-      <section id="upload-asset" class="page">
-        <h1 class="page-title">Upload Asset (.rbxm)</h1>
-        <p class="page-subtitle">Publish model files directly to your profile or group catalog.</p>
-
-        <div class="card">
-          <div class="form-group">
-            <label>Select .rbxm File <span class="badge-req">Required</span></label>
-            <input type="file" id="asset-file" accept=".rbxm,.rbxmx" />
-          </div>
-
-          <div class="form-group">
-            <label>Asset Name <span class="badge-req">Required</span></label>
-            <input type="text" id="asset-name" placeholder="Model Name" value="Modelo via Cloud" />
-          </div>
-
-          <div class="form-group">
-            <label>Group ID (0 for Personal Profile) <span class="badge-opt">Optional</span></label>
-            <input type="text" id="asset-group-id" value="0" placeholder="0" />
-          </div>
-
-          <button class="btn-action" id="btn-upload-asset" onclick="handleUploadAsset()">Execute Upload Asset</button>
+        <div class="console-box" id="consoleBox">
+          <div class="console-line">[INFO] Studio Cloud initialized.</div>
+          <div class="console-line">[INFO] Waiting for authentication...</div>
         </div>
-      </section>
-
-      <!-- CONSOLE LOGS PAGE -->
-      <section id="console-logs" class="page">
-        <h1 class="page-title">Console Logs</h1>
-        <p class="page-subtitle">Real-time system activity and output logs.</p>
-
-        <div class="card">
-          <div class="console-box" id="consoleBox">[INFO] Studio Cloud initialized.
-[INFO] Waiting for authentication...</div>
-        </div>
-      </section>
-
-    </main>
+      </div>
+    </div>
   </div>
 
   <script>
-    // --- URL ---
-    const WORKER_URL = 'https://misty-voice-b490.silva09jardel.workers.dev/';
-    let USER_COOKIE = "";
+    let workerUrl = "";
+    let userCookie = "";
 
-    // --- AUTO-LOGIN ---
-    window.addEventListener('DOMContentLoaded', () => {
-      const savedCookie = localStorage.getItem('sc_cookie');
-      if (savedCookie) {
-        document.getElementById('security-cookie').value = savedCookie;
-        handleLogin(true);
-      }
-    });
-
-    // --- HELPER FUNCTIONS ---
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-    function notify(message, type = 'info') {
+    function showToast(message, type = 'info') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
-
-      const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-
+      
       toast.innerHTML = `
         <div class="toast-content">
-          <span>${icons[type] || 'ℹ️'}</span>
           <span>${message}</span>
         </div>
-        <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+        <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
       `;
 
       container.appendChild(toast);
-
       setTimeout(() => {
         toast.style.animation = 'fadeOut 0.3s ease forwards';
         setTimeout(() => toast.remove(), 300);
       }, 4000);
     }
 
-    function appendLog(message, type = 'INFO') {
+    function logConsole(message, type = '') {
       const consoleBox = document.getElementById('consoleBox');
-      const timestamp = new Date().toLocaleTimeString();
-      consoleBox.innerText += `\n[${timestamp}] [${type}] ${message}`;
+      const line = document.createElement('div');
+      line.className = `console-line ${type}`;
+      
+      const time = new Date().toTimeString().split(' ')[0];
+      line.textContent = `[${time}] ${message}`;
+      
+      consoleBox.appendChild(line);
       consoleBox.scrollTop = consoleBox.scrollHeight;
     }
 
-    // --- AUTOMATIC AUTHENTICATION ---
-    async function handleLogin(isAutoLogin = false) {
-      let cookieInput = document.getElementById('security-cookie').value.trim();
+    async function handleLogin() {
+      workerUrl = document.getElementById('workerUrlInput').value.trim();
+      userCookie = document.getElementById('cookieInput').value.trim();
 
-      if ((cookieInput.startsWith('"') && cookieInput.endsWith('"')) || (cookieInput.startsWith("'") && cookieInput.endsWith("'"))) {
-        cookieInput = cookieInput.slice(1, -1);
-      }
-
-      if (!cookieInput || !cookieInput.includes("_|WARNING:-DO-NOT-SHARE-THIS")) {
-        notify("Invalid cookie! Please check format.", "error");
-        appendLog("Authentication failed: Invalid cookie format.", "WARN");
+      if (!workerUrl || !userCookie) {
+        showToast('Preencha a URL do Worker e o Cookie!', 'error');
         return;
       }
 
-      const loginBtn = document.getElementById('btn-login');
-      loginBtn.innerText = "Authenticating...";
-      loginBtn.disabled = true;
+      const btn = document.getElementById('btnLogin');
+      btn.textContent = 'Autenticando...';
+      btn.disabled = true;
 
       try {
-        const authRes = await callWorker({
-          action: 'getUserInfo',
-          cookie: cookieInput
-        });
-
-        if (!authRes || !authRes.ok || !authRes.userId) {
-          throw new Error(authRes?.message || "Could not validate cookie against Roblox API.");
-        }
-
-        const userId = authRes.userId;
-        const actualName = authRes.username || "RobloxPlayer";
-        const displayName = authRes.displayName || actualName;
-
-        const thumbRes = await fetch(`https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
-        const thumbData = await thumbRes.json();
-        
-        document.getElementById('sidebar-displayname').innerText = displayName;
-        document.getElementById('sidebar-username').innerText = `@${actualName}`;
-        
-        const avatarImg = document.getElementById('sidebar-avatar-img');
-        const avatarText = document.getElementById('sidebar-avatar-text');
-
-        if (thumbData.data && thumbData.data.length > 0) {
-          avatarImg.src = thumbData.data[0].imageUrl;
-          avatarImg.style.display = "block";
-          avatarText.style.display = "none";
-        } else {
-          avatarImg.style.display = "none";
-          avatarText.style.display = "flex";
-          avatarText.innerText = actualName.charAt(0).toUpperCase();
-        }
-
-        USER_COOKIE = cookieInput;
-        localStorage.setItem('sc_cookie', cookieInput);
-        
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('dashboardLayout').style.display = 'flex';
-        
-        if (!isAutoLogin) notify(`Welcome back, ${displayName}!`, "success");
-        appendLog(`User @${actualName} (ID: ${userId}) authenticated successfully.`, "SUCCESS");
-
-      } catch (err) {
-        notify("Authentication failed. Please check your cookie.", "error");
-        appendLog(`Authentication Error: ${err.message}`, "ERROR");
-      } finally {
-        loginBtn.innerText = "Authenticate";
-        loginBtn.disabled = false;
-      }
-    }
-
-    function handleLogout() {
-      USER_COOKIE = "";
-      localStorage.removeItem('sc_cookie');
-      document.getElementById('security-cookie').value = "";
-      
-      document.getElementById('dashboardLayout').style.display = 'none';
-      document.getElementById('loginScreen').style.display = 'flex';
-      
-      notify("Session closed successfully.", "info");
-      appendLog("User logged out.", "INFO");
-    }
-
-    // --- UI & NAVIGATION ---
-    const sidebar = document.getElementById('sidebar');
-    document.getElementById('toggleSidebar').addEventListener('click', () => {
-      sidebar.classList.toggle('collapsed');
-    });
-
-    function switchPage(pageId, element) {
-      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-      document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-      
-      document.getElementById(pageId).classList.add('active');
-      if (element) element.classList.add('active');
-    }
-
-    // --- WORKER API REQUEST ---
-    async function callWorker(payload) {
-      try {
-        const resp = await fetch(WORKER_URL, {
+        const res = await fetch(workerUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({ action: 'getUserInfo', cookie: userCookie })
         });
 
-        if (resp.status === 429) {
-          const retryAfter = resp.headers.get('Retry-After') || '60';
-          return { ok: false, message: 'Rate limited. Retry after ' + retryAfter + 's.' };
-        }
-        if (resp.status === 403) {
-          return { ok: false, message: 'Request blocked by worker (origin not allowed).' };
-        }
+        const data = await res.json();
 
-        return await resp.json();
-      } catch (error) {
-        return { ok: false, message: 'Network error connecting to worker: ' + error.message };
+        if (data.ok) {
+          document.getElementById('userDisplayName').textContent = data.displayName;
+          document.getElementById('userHandle').textContent = `@${data.username}`;
+          
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('dashboardLayout').style.display = 'flex';
+
+          logConsole(`User @${data.username} (ID: ${data.userId}) authenticated successfully.`, 'info');
+          showToast('Autenticado com sucesso!', 'success');
+        } else {
+          showToast(data.message || 'Falha na autenticação.', 'error');
+          btn.textContent = 'Autenticar Painel';
+          btn.disabled = false;
+        }
+      } catch (err) {
+        showToast('Erro de conexão com o Worker.', 'error');
+        logConsole('Connection error: ' + err.message, 'error');
+        btn.textContent = 'Autenticar Painel';
+        btn.disabled = false;
       }
     }
 
-    // --- ACTION HANDLERS ---
-    async function handleCreatePlace() {
-      const universeId = document.getElementById('place-universe-id').value.trim();
-      const template = parseInt(document.getElementById('place-template-id').value) || 95206881;
-      const count = parseInt(document.getElementById('place-count').value) || 1;
-      const delay = parseFloat(document.getElementById('place-delay').value) || 1;
+    async function handleUpload() {
+      const assetName = document.getElementById('assetNameInput').value.trim();
+      const groupId = document.getElementById('groupIdInput').value.trim() || '0';
+      const fileInput = document.getElementById('fileInput');
 
-      if (!USER_COOKIE) {
-        notify("Session expired. Please log in again.", "error");
-        handleLogout();
-        return;
-      }
-
-      if (!universeId || isNaN(universeId)) {
-        notify("A valid Universe ID is required!", "warning");
-        return;
-      }
-
-      const btn = document.getElementById('btn-create-place');
-      btn.disabled = true;
-
-      notify(`Executing Create Place (${count}x)...`, "info");
-      appendLog(`Starting Create Place | Universe: ${universeId} | Template: ${template} | Count: ${count} | Delay: ${delay}s`, "INFO");
-
-      let ok = 0, err = 0;
-
-      for (let i = 1; i <= count; i++) {
-        appendLog(`[${i}/${count}] Sending request...`, "INFO");
-        try {
-          const res = await callWorker({
-            action: 'createPlace',
-            cookie: USER_COOKIE,
-            universeId: universeId,
-            templateId: template
-          });
-
-          if (res && res.ok) {
-            ok++;
-            appendLog(`[Place ${i}/${count}] SUCCESS: ${res.message}`, "SUCCESS");
-          } else {
-            err++;
-            appendLog(`[Place ${i}/${count}] ERROR: ${res?.message || 'Unknown error'}`, "ERROR");
-          }
-        } catch (e) {
-          err++;
-          appendLog(`[Place ${i}/${count}] Connection failure: ${e.message}`, "ERROR");
-        }
-
-        if (i < count) await sleep(delay * 1000);
-      }
-
-      btn.disabled = false;
-      notify(`Finished: ${ok} successes, ${err} failures.`, ok > 0 ? "success" : "error");
-      appendLog(`Create Place task completed. Success: ${ok}, Failure: ${err}`, "INFO");
-    }
-
-    async function handleCreateUniverse() {
-      const template = parseInt(document.getElementById('universe-template-id').value) || 95206881;
-      const count = parseInt(document.getElementById('universe-count').value) || 1;
-      const delay = parseFloat(document.getElementById('universe-delay').value) || 1;
-
-      if (!USER_COOKIE) {
-        notify("Session expired. Please log in again.", "error");
-        handleLogout();
-        return;
-      }
-
-      const btn = document.getElementById('btn-create-universe');
-      btn.disabled = true;
-
-      notify(`Executing Create Universe (${count}x)...`, "info");
-      appendLog(`Starting Create Universe | Template: ${template} | Count: ${count} | Delay: ${delay}s`, "INFO");
-
-      let ok = 0, err = 0;
-
-      for (let i = 1; i <= count; i++) {
-        appendLog(`[${i}/${count}] Sending request...`, "INFO");
-        try {
-          const res = await callWorker({
-            action: 'createUniverse',
-            cookie: USER_COOKIE,
-            templateId: template
-          });
-
-          if (res && res.ok) {
-            ok++;
-            appendLog(`[Universe ${i}/${count}] SUCCESS: ${res.message}`, "SUCCESS");
-          } else {
-            err++;
-            appendLog(`[Universe ${i}/${count}] ERROR: ${res?.message || 'Unknown error'}`, "ERROR");
-          }
-        } catch (e) {
-          err++;
-          appendLog(`[Universe ${i}/${count}] Connection failure: ${e.message}`, "ERROR");
-        }
-
-        if (i < count) await sleep(delay * 1000);
-      }
-
-      btn.disabled = false;
-      notify(`Finished: ${ok} successes, ${err} failures.`, ok > 0 ? "success" : "error");
-      appendLog(`Create Universe task completed. Success: ${ok}, Failure: ${err}`, "INFO");
-    }
-
-    async function handleUploadAsset() {
-      const fileInput = document.getElementById('asset-file');
-      const assetName = document.getElementById('asset-name').value.trim();
-      const groupId = document.getElementById('asset-group-id').value.trim() || '0';
-
-      if (!USER_COOKIE) {
-        notify("Session expired. Please log in again.", "error");
-        handleLogout();
-        return;
-      }
-
-      if (!fileInput.files || fileInput.files.length === 0) {
-        notify("Please select a .rbxm file to upload!", "warning");
-        return;
-      }
-
-      if (!assetName) {
-        notify("Asset name is required!", "warning");
+      if (!assetName || fileInput.files.length === 0) {
+        showToast('Informe o nome e selecione um arquivo!', 'warning');
         return;
       }
 
       const file = fileInput.files[0];
-      const btn = document.getElementById('btn-upload-asset');
-      btn.disabled = true;
+      logConsole(`Starting Upload Asset | File: ${file.name} | Name: ${assetName} | GroupID: ${groupId}`, 'info');
+      showToast('Convertendo arquivo e enviando...', 'info');
 
-      notify("Reading file and uploading asset...", "info");
-      appendLog(`Starting Upload Asset | File: ${file.name} | Name: ${assetName} | GroupID: ${groupId}`, "INFO");
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const base64Data = e.target.result.split(',')[1];
 
-      try {
-        // Convert file to Base64 to safely transmit through JSON/Worker API
-        const reader = new FileReader();
-        const base64Data = await new Promise((resolve, reject) => {
-          reader.onload = () => resolve(reader.result.split(',')[1]);
-          reader.onerror = error => reject(error);
-          reader.readAsDataURL(file);
-        });
+        try {
+          const res = await fetch(workerUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'uploadAsset',
+              cookie: userCookie,
+              assetName: assetName,
+              groupId: groupId,
+              fileData: base64Data
+            })
+          });
 
-        const res = await callWorker({
-          action: 'uploadAsset',
-          cookie: USER_COOKIE,
-          assetName: assetName,
-          groupId: groupId,
-          fileName: file.name,
-          fileData: base64Data
-        });
+          const data = await res.json();
 
-        if (res && res.ok) {
-          notify(`Asset uploaded successfully! ID: ${res.assetId}`, "success");
-          appendLog(`[Upload Asset] SUCCESS: Asset ID Generated -> ${res.assetId}`, "SUCCESS");
-        } else {
-          notify(`Upload failed: ${res?.message || 'Unknown error'}`, "error");
-          appendLog(`[Upload Asset] ERROR: ${res?.message || 'Unknown error'}`, "ERROR");
+          if (data.ok) {
+            logConsole(`[Upload Asset] SUCCESS: Asset ID Generated -> ${data.assetId}`, 'info');
+            showToast(`Upload concluído! ID: ${data.assetId}`, 'success');
+          } else {
+            logConsole(`[Upload Asset] ERROR: ${data.message}`, 'error');
+            showToast('Erro no upload. Veja o console.', 'error');
+          }
+        } catch (err) {
+          logConsole(`[Upload Asset] Network Error: ${err.message}`, 'error');
+          showToast('Erro de rede ao enviar asset.', 'error');
         }
-      } catch (e) {
-        notify(`Connection failure: ${e.message}`, "error");
-        appendLog(`[Upload Asset] Connection failure: ${e.message}`, "ERROR");
-      } finally {
-        btn.disabled = false;
-      }
+      };
+
+      reader.readAsDataURL(file);
     }
   </script>
 </body>
