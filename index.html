@@ -1,22 +1,235 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio Cloud API</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #121212; color: #fff; text-align: center; padding: 40px 20px; }
-        h1 { color: #00a2ff; }
-        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        button { background-color: #00a2ff; color: #fff; border: none; padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 15px; }
-        button:hover { background-color: #0082cc; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Studio Cloud — Roblox Publisher</title>
+  <style>
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --border-color: #30363d;
+      --primary: #2f81f7;
+      --primary-hover: #58a6ff;
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --success: #238636;
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      background: rgba(47, 129, 247, 0.15);
+      color: var(--primary-hover);
+      padding: 4px 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(47, 129, 247, 0.3);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+    }
+
+    .dropzone {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(255,255,255,0.01);
+      transition: all 0.2s;
+    }
+
+    .dropzone:hover {
+      border-color: var(--primary);
+      background: rgba(47, 129, 247, 0.04);
+    }
+
+    .dropzone p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .file-info {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: var(--primary-hover);
+      font-weight: 500;
+    }
+
+    button.btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s;
+    }
+
+    button.btn-submit:hover {
+      background: var(--primary-hover);
+    }
+
+    .console {
+      margin-top: 20px;
+      background: #040d14;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 12px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #7ee787;
+      height: 80px;
+      overflow-y: auto;
+    }
+  </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Studio Cloud API</h1>
-        <p>Test Only.</p>
-        <button onclick="alert('Login em breve!')">Login With Roblox</button>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        ☁️ Studio Cloud
+      </div>
+      <span class="badge">v1.0.0</span>
     </div>
+
+    <form id="publishForm">
+      <div class="form-group">
+        <label for="universeId">Universe ID</label>
+        <input type="text" id="universeId" placeholder="Ex: 123456789" required />
+      </div>
+
+      <div class="form-group">
+        <label for="placeId">Place ID</label>
+        <input type="text" id="placeId" placeholder="Ex: 987654321" required />
+      </div>
+
+      <div class="form-group">
+        <label for="apiKey">Open Cloud API Key</label>
+        <input type="password" id="apiKey" placeholder="Sua chave de API Roblox" required />
+      </div>
+
+      <div class="form-group">
+        <label>Arquivo do Jogo (.rbxl / .rbxm)</label>
+        <div class="dropzone" onclick="document.getElementById('fileInput').click()">
+          📂 Clique para selecionar o arquivo
+          <p>Formatos suportados: .rbxl, .rbxlx, .rbxm</p>
+          <div class="file-info" id="fileName">Nenhum arquivo selecionado</div>
+        </div>
+        <input type="file" id="fileInput" accept=".rbxl,.rbxlx,.rbxm" style="display:none" onchange="updateFileInfo()" />
+      </div>
+
+      <button type="button" class="btn-submit" onclick="simulatePublish()">Publicar no Roblox</button>
+    </form>
+
+    <div class="console" id="consoleLog">> Studio Cloud pronto para uso...</div>
+  </div>
+
+  <script>
+    function updateFileInfo() {
+      const input = document.getElementById('fileInput');
+      const info = document.getElementById('fileName');
+      if (input.files.length > 0) {
+        const file = input.files[0];
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+        info.innerText = `📄 ${file.name} (${sizeMb} MB)`;
+      }
+    }
+
+    function simulatePublish() {
+      const log = document.getElementById('consoleLog');
+      const universeId = document.getElementById('universeId').value;
+      const placeId = document.getElementById('placeId').value;
+      const fileInput = document.getElementById('fileInput');
+
+      if (!universeId || !placeId || fileInput.files.length === 0) {
+        log.innerHTML += '<br><span style="color:#f85149">> Erro: Preencha todos os campos e selecione um arquivo!</span>';
+        log.scrollTop = log.scrollHeight;
+        return;
+      }
+
+      log.innerHTML += `<br>> Lendo arquivo ${fileInput.files[0].name}...`;
+      log.innerHTML += `<br>> Conectando à Open Cloud API (Universe: ${universeId})...`;
+      log.scrollTop = log.scrollHeight;
+    }
+  </script>
+
 </body>
 </html>
