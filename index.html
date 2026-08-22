@@ -158,7 +158,7 @@
 
     /* --- DASHBOARD LAYOUT --- */
     .dashboard-layout {
-      display: none; /* Hidden by default until logged in */
+      display: none; 
       height: 100%;
       width: 100%;
     }
@@ -269,17 +269,18 @@
     }
 
     .avatar {
-      width: clamp(24px, 2vw, 28px);
-      height: clamp(24px, 2vw, 28px);
+      width: clamp(28px, 2.5vw, 32px);
+      height: clamp(28px, 2.5vw, 32px);
       border-radius: 50%;
       background: var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      font-size: 0.75rem;
+      font-size: 0.85rem;
       color: #fff;
       flex-shrink: 0;
+      object-fit: cover;
     }
 
     .username {
@@ -428,11 +429,16 @@
       <p>Securely connect to your Roblox workspace.</p>
       
       <div class="login-input-group">
+        <label for="roblox-username">Roblox Username</label>
+        <input type="text" id="roblox-username" placeholder="Enter your username (for profile pic)" />
+      </div>
+
+      <div class="login-input-group">
         <label for="security-cookie">.ROBLOSECURITY Cookie</label>
         <input type="password" id="security-cookie" placeholder="_|WARNING:-DO-NOT-SHARE-THIS..." />
       </div>
 
-      <button class="btn-action" onclick="handleLogin()">Authenticate</button>
+      <button class="btn-action" id="btn-login" onclick="handleLogin()">Authenticate</button>
     </div>
   </div>
 
@@ -464,8 +470,9 @@
       <div class="sidebar-footer">
         <div class="user-profile">
           <div class="user-info">
-            <div class="avatar">R</div>
-            <span class="username nav-text">Authenticated User</span>
+            <img class="avatar" id="sidebar-avatar-img" src="" style="display: none;" />
+            <div class="avatar" id="sidebar-avatar-text">R</div>
+            <span class="username nav-text" id="sidebar-username">Authenticated User</span>
           </div>
           <button class="btn-logout" onclick="handleLogout()" title="Logout">✕</button>
         </div>
@@ -581,34 +588,99 @@
     }
 
     // --- AUTHENTICATION ---
-    function handleLogin() {
+    async function handleLogin() {
+      const usernameInput = document.getElementById('roblox-username').value.trim();
       const cookieInput = document.getElementById('security-cookie').value.trim();
 
-      if (!cookieInput) {
-        notify("Please enter your .ROBLOSECURITY cookie.", "warning");
+      if (!usernameInput) {
+        notify("Please enter your Roblox Username.", "warning");
         return;
       }
 
-      // Basic validation to check if it's a valid Roblox cookie format
-      if (!cookieInput.includes("_|WARNING:-DO-NOT-SHARE-THIS")) {
+      if (!cookieInput || !cookieInput.includes("_|WARNING:-DO-NOT-SHARE-THIS")) {
         notify("Invalid cookie format. It must start with _|WARNING...", "error");
         appendLog("Authentication failed: Invalid cookie format provided.", "WARN");
         return;
       }
 
-      USER_COOKIE = cookieInput;
-      
-      // Switch UI
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('dashboardLayout').style.display = 'flex';
-      
-      notify("Successfully authenticated!", "success");
-      appendLog("User logged in with .ROBLOSECURITY cookie.", "SUCCESS");
+      const loginBtn = document.getElementById('btn-login');
+      loginBtn.innerText = "Loading Profile...";
+      loginBtn.disabled = true;
+
+      try {
+        // Fetch User ID via proxy
+        const userRes = await fetch("https://users.roproxy.com/v1/usernames/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usernames: [usernameInput], excludeBannedUsers: true })
+        });
+        
+        const userData = await userRes.json();
+        
+        if (!userData.data || userData.data.length === 0) {
+          notify("Roblox username not found!", "error");
+          loginBtn.innerText = "Authenticate";
+          loginBtn.disabled = false;
+          return;
+        }
+
+        const userId = userData.data[0].id;
+        const displayName = userData.data[0].displayName;
+        const actualName = userData.data[0].name;
+
+        // Fetch Thumbnail
+        const thumbRes = await fetch(`https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
+        const thumbData = await thumbRes.json();
+        
+        // Update Sidebar UI
+        document.getElementById('sidebar-username').innerText = displayName || actualName;
+        
+        const avatarImg = document.getElementById('sidebar-avatar-img');
+        const avatarText = document.getElementById('sidebar-avatar-text');
+
+        if (thumbData.data && thumbData.data.length > 0) {
+          avatarImg.src = thumbData.data[0].imageUrl;
+          avatarImg.style.display = "block";
+          avatarText.style.display = "none";
+        } else {
+          avatarImg.style.display = "none";
+          avatarText.style.display = "flex";
+          avatarText.innerText = actualName.charAt(0).toUpperCase();
+        }
+
+        USER_COOKIE = cookieInput;
+        
+        // Switch UI
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboardLayout').style.display = 'flex';
+        
+        notify(`Welcome, ${displayName || actualName}!`, "success");
+        appendLog(`User ${actualName} logged in with .ROBLOSECURITY cookie.`, "SUCCESS");
+
+      } catch (err) {
+        notify("Failed to fetch profile picture (CORS/Network error).", "warning");
+        appendLog(`Profile Fetch Error: ${err.message}`, "WARN");
+        
+        // Fallback login if proxy fails
+        USER_COOKIE = cookieInput;
+        document.getElementById('sidebar-username').innerText = usernameInput;
+        document.getElementById('sidebar-avatar-img').style.display = "none";
+        document.getElementById('sidebar-avatar-text').style.display = "flex";
+        document.getElementById('sidebar-avatar-text').innerText = usernameInput.charAt(0).toUpperCase();
+
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboardLayout').style.display = 'flex';
+        notify("Logged in (Fallback mode).", "info");
+      } finally {
+        loginBtn.innerText = "Authenticate";
+        loginBtn.disabled = false;
+      }
     }
 
     function handleLogout() {
       USER_COOKIE = "";
       document.getElementById('security-cookie').value = "";
+      document.getElementById('roblox-username').value = "";
       
       // Switch UI back to login
       document.getElementById('dashboardLayout').style.display = 'none';
