@@ -34,6 +34,69 @@
       overflow: hidden;
     }
 
+    /* Custom Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 360px;
+      width: 100%;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--blue);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      color: var(--text-heading);
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      animation: slideIn 0.3s ease forwards;
+    }
+
+    .toast.success { border-left-color: #238636; }
+    .toast.error { border-left-color: #da3633; }
+    .toast.warning { border-left-color: #d29922; }
+    .toast.info { border-left-color: #2f81f7; }
+
+    .toast-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0 4px;
+    }
+
+    .toast-close:hover {
+      color: var(--text-heading);
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
     /* Sidebar Styles */
     .sidebar {
       width: 260px;
@@ -41,7 +104,7 @@
       border-right: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
-      transition: width 0.25s ease, padding 0.25s ease;
+      transition: width 0.25s ease;
       white-space: nowrap;
       overflow: hidden;
     }
@@ -75,9 +138,6 @@
       cursor: pointer;
       padding: 6px 8px;
       border-radius: var(--radius);
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
     .toggle-btn:hover {
@@ -100,7 +160,6 @@
       gap: 12px;
       padding: 10px 12px;
       color: var(--text-muted);
-      text-decoration: none;
       border-radius: var(--radius);
       cursor: pointer;
       font-size: 0.9rem;
@@ -117,6 +176,85 @@
       font-size: 1.1rem;
       min-width: 24px;
       text-align: center;
+    }
+
+    /* Roblox Auth Footer */
+    .sidebar-footer {
+      padding: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .btn-roblox-login {
+      width: 100%;
+      background: #000000;
+      border: 1px solid var(--border-color);
+      color: #ffffff;
+      padding: 10px;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn-roblox-login:hover {
+      background: #111;
+      border-color: var(--blue);
+    }
+
+    .user-profile {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.75rem;
+      color: #fff;
+    }
+
+    .username {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-heading);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .btn-logout:hover {
+      color: #f85149;
     }
 
     /* Main Content Area */
@@ -159,6 +297,18 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
+    .auth-banner {
+      background: rgba(47, 129, 247, 0.1);
+      border: 1px solid rgba(47, 129, 247, 0.3);
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+    }
+
     .form-group {
       margin-bottom: 18px;
     }
@@ -172,15 +322,8 @@
       font-weight: 500;
     }
 
-    .badge-req {
-      color: #f85149;
-      font-size: 0.75rem;
-    }
-
-    .badge-opt {
-      color: var(--text-muted);
-      font-size: 0.75rem;
-    }
+    .badge-req { color: #f85149; font-size: 0.75rem; }
+    .badge-opt { color: var(--text-muted); font-size: 0.75rem; }
 
     input[type="text"],
     input[type="number"],
@@ -234,6 +377,9 @@
 </head>
 <body>
 
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -242,6 +388,7 @@
       </div>
       <button class="toggle-btn" id="toggleSidebar" title="Toggle Sidebar">☰</button>
     </div>
+
     <ul class="menu">
       <li class="menu-item active" onclick="switchPage('create-place', this)">
         <span class="icon">➕</span>
@@ -256,6 +403,21 @@
         <span class="nav-text">Console Logs</span>
       </li>
     </ul>
+
+    <!-- Roblox Auth Section -->
+    <div class="sidebar-footer">
+      <button class="btn-roblox-login" id="robloxLoginBtn" onclick="loginWithRoblox()">
+        <span>🔴</span> <span class="nav-text">Login with Roblox</span>
+      </button>
+
+      <div class="user-profile" id="userProfile">
+        <div class="user-info">
+          <div class="avatar" id="userAvatar">R</div>
+          <span class="username nav-text" id="usernameLabel">RobloxUser</span>
+        </div>
+        <button class="btn-logout" onclick="logoutRoblox()" title="Logout">✕</button>
+      </div>
+    </div>
   </aside>
 
   <!-- Main Content -->
@@ -267,9 +429,14 @@
       <p class="page-subtitle">Add a new place to an existing Roblox Universe.</p>
 
       <div class="card">
+        <div class="auth-banner" id="placeAuthBanner">
+          <span>🔒 Login with Roblox or enter API Key below.</span>
+          <button class="btn-roblox-login" style="width: auto; padding: 4px 10px;" onclick="loginWithRoblox()">Auth</button>
+        </div>
+
         <div class="form-group">
-          <label>API Key / Login <span class="badge-req">Required</span></label>
-          <input type="password" id="place-key" placeholder="Enter your Roblox Open Cloud API Key" />
+          <label>API Key / OAuth Token <span class="badge-req">Required</span></label>
+          <input type="password" id="place-key" placeholder="Enter API Key or login via Roblox Auth" />
         </div>
 
         <div class="form-group">
@@ -302,9 +469,14 @@
       <p class="page-subtitle">Generate new Roblox Universes automatically.</p>
 
       <div class="card">
+        <div class="auth-banner" id="universeAuthBanner">
+          <span>🔒 Login with Roblox or enter API Key below.</span>
+          <button class="btn-roblox-login" style="width: auto; padding: 4px 10px;" onclick="loginWithRoblox()">Auth</button>
+        </div>
+
         <div class="form-group">
-          <label>API Key / Login <span class="badge-req">Required</span></label>
-          <input type="password" id="universe-key" placeholder="Enter your Roblox Open Cloud API Key" />
+          <label>API Key / OAuth Token <span class="badge-req">Required</span></label>
+          <input type="password" id="universe-key" placeholder="Enter API Key or login via Roblox Auth" />
         </div>
 
         <div class="form-group">
@@ -340,13 +512,45 @@
   </main>
 
   <script>
-    // Sidebar toggle
+    // State
+    let isLoggedIn = false;
+
+    // Custom Toast Notification System
+    function notify(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+
+      const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+      };
+
+      toast.innerHTML = `
+        <div class="toast-content">
+          <span>${icons[type] || 'ℹ️'}</span>
+          <span>${message}</span>
+        </div>
+        <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+      `;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // Sidebar Toggle
     const sidebar = document.getElementById('sidebar');
     document.getElementById('toggleSidebar').addEventListener('click', () => {
       sidebar.classList.toggle('collapsed');
     });
 
-    // Page navigation
+    // Navigation
     function switchPage(pageId, element) {
       document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
@@ -355,7 +559,7 @@
       element.classList.add('active');
     }
 
-    // Logger
+    // Console Logging
     function appendLog(message, type = 'INFO') {
       const consoleBox = document.getElementById('consoleBox');
       const timestamp = new Date().toLocaleTimeString();
@@ -363,7 +567,36 @@
       consoleBox.scrollTop = consoleBox.scrollHeight;
     }
 
-    // Handlers
+    // Roblox Auth Handlers
+    function loginWithRoblox() {
+      isLoggedIn = true;
+      const fakeUsername = "RobloxDev_" + Math.floor(1000 + Math.random() * 9000);
+
+      document.getElementById('robloxLoginBtn').style.display = 'none';
+      document.getElementById('userProfile').style.display = 'flex';
+      document.getElementById('usernameLabel').innerText = fakeUsername;
+      document.getElementById('userAvatar').innerText = fakeUsername.charAt(0);
+
+      document.getElementById('place-key').value = "oauth_roblox_session_active";
+      document.getElementById('universe-key').value = "oauth_roblox_session_active";
+
+      notify(`Successfully authenticated as ${fakeUsername}!`, 'success');
+      appendLog(`User logged in via Roblox OAuth: ${fakeUsername}`, 'SUCCESS');
+    }
+
+    function logoutRoblox() {
+      isLoggedIn = false;
+      document.getElementById('robloxLoginBtn').style.display = 'flex';
+      document.getElementById('userProfile').style.display = 'none';
+
+      document.getElementById('place-key').value = "";
+      document.getElementById('universe-key').value = "";
+
+      notify("Logged out from Roblox account.", "info");
+      appendLog("User logged out.", "INFO");
+    }
+
+    // Action Handlers
     function handleCreatePlace() {
       const key = document.getElementById('place-key').value;
       const universeId = document.getElementById('place-universe-id').value;
@@ -371,14 +604,20 @@
       const count = document.getElementById('place-count').value || 1;
       const delay = document.getElementById('place-delay').value || 1;
 
-      if (!key || !universeId) {
-        alert("Please fill in all required fields (API Key and Universe ID).");
-        appendLog("Create Place failed: Missing required fields.", "ERROR");
+      if (!key) {
+        notify("API Key or Roblox Auth is required!", "error");
+        appendLog("Create Place failed: Missing authentication.", "ERROR");
         return;
       }
 
-      appendLog(`Starting Create Place task...`);
-      appendLog(`Target Universe: ${universeId} | Template: ${template} | Quantity: ${count} | Delay: ${delay}s`);
+      if (!universeId) {
+        notify("Universe ID is required!", "warning");
+        appendLog("Create Place failed: Missing Universe ID.", "ERROR");
+        return;
+      }
+
+      notify(`Creating ${count} Place(s)...`, "success");
+      appendLog(`Executing Create Place | Universe: ${universeId} | Template: ${template} | Quantity: ${count} | Delay: ${delay}s`);
     }
 
     function handleCreateUniverse() {
@@ -388,13 +627,13 @@
       const delay = document.getElementById('universe-delay').value || 1;
 
       if (!key) {
-        alert("Please fill in the required API Key / Login field.");
-        appendLog("Create Universe failed: Missing API Key.", "ERROR");
+        notify("API Key or Roblox Auth is required!", "error");
+        appendLog("Create Universe failed: Missing authentication.", "ERROR");
         return;
       }
 
-      appendLog(`Starting Create Universe task...`);
-      appendLog(`Template: ${template} | Quantity: ${count} | Delay: ${delay}s`);
+      notify(`Creating ${count} Universe(s)...`, "success");
+      appendLog(`Executing Create Universe | Template: ${template} | Quantity: ${count} | Delay: ${delay}s`);
     }
   </script>
 </body>
