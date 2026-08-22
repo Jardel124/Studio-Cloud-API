@@ -31,6 +31,7 @@
       color: var(--text-main);
       display: flex;
       height: 100vh;
+      width: 100vw;
       overflow: hidden;
     }
 
@@ -43,7 +44,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      max-width: 360px;
+      max-width: clamp(280px, 80vw, 360px);
       width: 100%;
       pointer-events: none;
     }
@@ -56,7 +57,7 @@
       border-radius: var(--radius);
       padding: 12px 16px;
       color: var(--text-heading);
-      font-size: 0.88rem;
+      font-size: clamp(0.8rem, 1vw, 0.88rem);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -97,24 +98,27 @@
       to { transform: translateX(100%); opacity: 0; }
     }
 
-    /* Sidebar Styles */
+    /* Scaled Sidebar Styles */
     .sidebar {
-      width: 260px;
+      width: clamp(200px, 20vw, 280px);
+      min-width: 180px;
       background-color: var(--bg-sidebar);
       border-right: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
-      transition: width 0.25s ease;
+      transition: width 0.25s ease, min-width 0.25s ease;
       white-space: nowrap;
       overflow: hidden;
+      flex-shrink: 0;
     }
 
     .sidebar.collapsed {
-      width: 60px;
+      width: clamp(50px, 5vw, 64px);
+      min-width: 50px;
     }
 
     .sidebar-header {
-      padding: 16px;
+      padding: clamp(12px, 1.5vh, 18px);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -122,7 +126,7 @@
     }
 
     .brand-title {
-      font-size: 1.1rem;
+      font-size: clamp(0.95rem, 1.2vw, 1.15rem);
       font-weight: 700;
       color: var(--text-heading);
       display: flex;
@@ -134,7 +138,7 @@
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 1.2rem;
+      font-size: clamp(1rem, 1.2vw, 1.3rem);
       cursor: pointer;
       padding: 6px 8px;
       border-radius: var(--radius);
@@ -158,11 +162,11 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 12px;
+      padding: clamp(8px, 1.2vh, 12px) 12px;
       color: var(--text-muted);
       border-radius: var(--radius);
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: clamp(0.82rem, 0.9vw, 0.92rem);
       font-weight: 500;
       transition: all 0.2s;
     }
@@ -173,14 +177,14 @@
     }
 
     .menu-item .icon {
-      font-size: 1.1rem;
+      font-size: clamp(1rem, 1.1vw, 1.2rem);
       min-width: 24px;
       text-align: center;
     }
 
     /* Roblox Auth Footer */
     .sidebar-footer {
-      padding: 12px;
+      padding: clamp(8px, 1.2vh, 14px);
       border-top: 1px solid var(--border-color);
     }
 
@@ -189,10 +193,10 @@
       background: #000000;
       border: 1px solid var(--border-color);
       color: #ffffff;
-      padding: 10px;
+      padding: clamp(8px, 1vh, 11px);
       border-radius: var(--radius);
       font-weight: 600;
-      font-size: 0.85rem;
+      font-size: clamp(0.78rem, 0.85vw, 0.88rem);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -224,8 +228,8 @@
     }
 
     .avatar {
-      width: 26px;
-      height: 26px;
+      width: clamp(24px, 2vw, 28px);
+      height: clamp(24px, 2vw, 28px);
       border-radius: 50%;
       background: var(--blue);
       display: flex;
@@ -234,10 +238,11 @@
       font-weight: bold;
       font-size: 0.75rem;
       color: #fff;
+      flex-shrink: 0;
     }
 
     .username {
-      font-size: 0.85rem;
+      font-size: clamp(0.78rem, 0.85vw, 0.88rem);
       font-weight: 600;
       color: var(--text-heading);
       white-space: nowrap;
@@ -263,12 +268,12 @@
       display: flex;
       flex-direction: column;
       overflow-y: auto;
-      padding: 30px;
+      padding: clamp(16px, 3vw, 36px);
     }
 
     .page {
       display: none;
-      max-width: 600px;
+      max-width: 650px;
       margin: 0 auto;
       width: 100%;
     }
@@ -278,13 +283,13 @@
     }
 
     .page-title {
-      font-size: 1.5rem;
+      font-size: clamp(1.25rem, 1.8vw, 1.65rem);
       color: var(--text-heading);
       margin-bottom: 8px;
     }
 
     .page-subtitle {
-      font-size: 0.85rem;
+      font-size: clamp(0.8rem, 0.9vw, 0.9rem);
       color: var(--text-muted);
       margin-bottom: 24px;
     }
@@ -293,7 +298,7 @@
       background: var(--bg-sidebar);
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: clamp(16px, 2.5vw, 28px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
@@ -306,7 +311,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 0.85rem;
+      font-size: clamp(0.78rem, 0.85vw, 0.88rem);
     }
 
     .form-group {
@@ -316,7 +321,7 @@
     label {
       display: flex;
       justify-content: space-between;
-      font-size: 0.85rem;
+      font-size: clamp(0.78rem, 0.85vw, 0.88rem);
       color: var(--text-heading);
       margin-bottom: 6px;
       font-weight: 500;
@@ -329,12 +334,12 @@
     input[type="number"],
     input[type="password"] {
       width: 100%;
-      padding: 10px 12px;
+      padding: clamp(8px, 1vh, 11px) 12px;
       background: var(--bg-main);
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
       color: var(--text-heading);
-      font-size: 0.9rem;
+      font-size: clamp(0.82rem, 0.9vw, 0.92rem);
       outline: none;
     }
 
@@ -344,13 +349,13 @@
 
     .btn-action {
       width: 100%;
-      padding: 12px;
+      padding: clamp(10px, 1.2vh, 14px);
       background: var(--primary);
       color: #fff;
       border: none;
       border-radius: var(--radius);
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: clamp(0.85rem, 0.95vw, 0.98rem);
       cursor: pointer;
       margin-top: 10px;
       transition: background 0.2s;
@@ -360,7 +365,6 @@
       background: var(--primary-hover);
     }
 
-    /* Console View */
     .console-box {
       background: var(--bg-main);
       border: 1px solid var(--border-color);
@@ -369,7 +373,7 @@
       font-family: monospace;
       font-size: 0.85rem;
       color: #7ee787;
-      height: 400px;
+      height: clamp(250px, 45vh, 450px);
       overflow-y: auto;
       white-space: pre-wrap;
     }
@@ -380,7 +384,7 @@
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- Sidebar -->
+  <!-- Scaled Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="brand-title">
@@ -406,7 +410,7 @@
 
     <!-- Roblox Auth Section -->
     <div class="sidebar-footer">
-      <button class="btn-roblox-login" id="robloxLoginBtn" onclick="loginWithRoblox()">
+      <button class="btn-roblox-login" id="robloxLoginBtn">
         <span>🔴</span> <span class="nav-text">Login with Roblox</span>
       </button>
 
@@ -429,9 +433,9 @@
       <p class="page-subtitle">Add a new place to an existing Roblox Universe.</p>
 
       <div class="card">
-        <div class="auth-banner" id="placeAuthBanner">
+        <div class="auth-banner">
           <span>🔒 Login with Roblox or enter API Key below.</span>
-          <button class="btn-roblox-login" style="width: auto; padding: 4px 10px;" onclick="loginWithRoblox()">Auth</button>
+          <button class="btn-roblox-login authPageBtn" style="width: auto; padding: 4px 10px;">Auth</button>
         </div>
 
         <div class="form-group">
@@ -469,9 +473,9 @@
       <p class="page-subtitle">Generate new Roblox Universes automatically.</p>
 
       <div class="card">
-        <div class="auth-banner" id="universeAuthBanner">
+        <div class="auth-banner">
           <span>🔒 Login with Roblox or enter API Key below.</span>
-          <button class="btn-roblox-login" style="width: auto; padding: 4px 10px;" onclick="loginWithRoblox()">Auth</button>
+          <button class="btn-roblox-login authPageBtn" style="width: auto; padding: 4px 10px;">Auth</button>
         </div>
 
         <div class="form-group">
@@ -504,7 +508,7 @@
       <p class="page-subtitle">Real-time system activity and output logs.</p>
 
       <div class="card">
-        <div class="console-box" id="consoleBox">[INFO] Studio Cloud initialized successfully.
+        <div class="console-box" id="consoleBox">[INFO] Studio Cloud initialized.
 [INFO] Waiting for action...</div>
       </div>
     </section>
@@ -512,21 +516,46 @@
   </main>
 
   <script>
-    // State
-    let isLoggedIn = false;
+    // --- CONFIGURAÇÃO OAUTH ROBLOX ---
+    const CLIENT_ID = "COLE_AQUI_O_CLIENT_ID_DO_ROBLOX"; 
+    const REDIRECT_URI = window.location.origin + window.location.pathname;
 
-    // Custom Toast Notification System
+    // Endpoints Oficiais Roblox OpenID Connect
+    const ROBLOX_AUTH_URL = "https://apis.roblox.com/oauth/v1/authorize";
+    const ROBLOX_TOKEN_URL = "https://apis.roblox.com/oauth/v1/token";
+    const ROBLOX_USERINFO_URL = "https://apis.roblox.com/oauth/v1/userinfo";
+
+    // --- FUNÇÕES PKCE ---
+    function dec2hex(dec) { return ('0' + dec.toString(16)).slice(-2); }
+    function generateCodeVerifier() {
+      var array = new Uint32Array(56);
+      window.crypto.getRandomValues(array);
+      return Array.from(array, dec2hex).join('');
+    }
+    async function sha256(plain) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(plain);
+      return window.crypto.subtle.digest('SHA-256', data);
+    }
+    function base64urlencode(a) {
+      var str = "";
+      var bytes = new Uint8Array(a);
+      var len = bytes.byteLength;
+      for (var i = 0; i < len; i++) { str += String.fromCharCode(bytes[i]); }
+      return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    }
+    async function generateCodeChallenge(v) {
+      const hashed = await sha256(v);
+      return base64urlencode(hashed);
+    }
+
+    // --- TOAST NOTIFICATIONS ---
     function notify(message, type = 'info') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
 
-      const icons = {
-        success: '✅',
-        error: '❌',
-        warning: '⚠️',
-        info: 'ℹ️'
-      };
+      const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
 
       toast.innerHTML = `
         <div class="toast-content">
@@ -544,13 +573,12 @@
       }, 4000);
     }
 
-    // Sidebar Toggle
+    // --- UI & NAVIGATION ---
     const sidebar = document.getElementById('sidebar');
     document.getElementById('toggleSidebar').addEventListener('click', () => {
       sidebar.classList.toggle('collapsed');
     });
 
-    // Navigation
     function switchPage(pageId, element) {
       document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
@@ -559,7 +587,6 @@
       element.classList.add('active');
     }
 
-    // Console Logging
     function appendLog(message, type = 'INFO') {
       const consoleBox = document.getElementById('consoleBox');
       const timestamp = new Date().toLocaleTimeString();
@@ -567,25 +594,35 @@
       consoleBox.scrollTop = consoleBox.scrollHeight;
     }
 
-    // Roblox Auth Handlers
-    function loginWithRoblox() {
-      isLoggedIn = true;
-      const fakeUsername = "RobloxDev_" + Math.floor(1000 + Math.random() * 9000);
+    // --- FLUXO DE LOGIN ROBLOX ---
+    async function startRobloxAuth() {
+      if (!CLIENT_ID || CLIENT_ID.includes("COLE_AQUI")) {
+        notify("Configure o CLIENT_ID no código para usar o login real!", "warning");
+        appendLog("OAuth cancelado: CLIENT_ID não configurado.", "WARN");
+        return;
+      }
 
-      document.getElementById('robloxLoginBtn').style.display = 'none';
-      document.getElementById('userProfile').style.display = 'flex';
-      document.getElementById('usernameLabel').innerText = fakeUsername;
-      document.getElementById('userAvatar').innerText = fakeUsername.charAt(0);
+      const codeVerifier = generateCodeVerifier();
+      const codeChallenge = await generateCodeChallenge(codeVerifier);
+      
+      localStorage.setItem("roblox_verifier", codeVerifier);
 
-      document.getElementById('place-key').value = "oauth_roblox_session_active";
-      document.getElementById('universe-key').value = "oauth_roblox_session_active";
+      const authUrl = `${ROBLOX_AUTH_URL}?` +
+        `client_id=${CLIENT_ID}&` +
+        `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
+        `response_type=code&` +
+        `scope=openid%20profile&` +
+        `code_challenge=${codeChallenge}&` +
+        `code_challenge_method=S256`;
 
-      notify(`Successfully authenticated as ${fakeUsername}!`, 'success');
-      appendLog(`User logged in via Roblox OAuth: ${fakeUsername}`, 'SUCCESS');
+      window.location.href = authUrl;
     }
 
+    document.getElementById('robloxLoginBtn').addEventListener('click', startRobloxAuth);
+    document.querySelectorAll('.authPageBtn').forEach(btn => btn.addEventListener('click', startRobloxAuth));
+
     function logoutRoblox() {
-      isLoggedIn = false;
+      localStorage.removeItem("roblox_token");
       document.getElementById('robloxLoginBtn').style.display = 'flex';
       document.getElementById('userProfile').style.display = 'none';
 
@@ -596,7 +633,74 @@
       appendLog("User logged out.", "INFO");
     }
 
-    // Action Handlers
+    function setLoggedInUser(username, token) {
+      document.getElementById('robloxLoginBtn').style.display = 'none';
+      document.getElementById('userProfile').style.display = 'flex';
+      document.getElementById('usernameLabel').innerText = username;
+      document.getElementById('userAvatar').innerText = username.charAt(0).toUpperCase();
+
+      document.getElementById('place-key').value = token;
+      document.getElementById('universe-key').value = token;
+    }
+
+    // --- PROCESSAMENTO DO RETORNO OAUTH ---
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+
+      if (code) {
+        notify("Processing Roblox authentication...", "info");
+        appendLog("Code received from Roblox. Exchanging for token...", "INFO");
+
+        const storedVerifier = localStorage.getItem("roblox_verifier");
+
+        fetch(ROBLOX_TOKEN_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            'client_id': CLIENT_ID,
+            'grant_type': 'authorization_code',
+            'code': code,
+            'redirect_uri': REDIRECT_URI,
+            'code_verifier': storedVerifier
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.access_token) {
+            localStorage.setItem("roblox_token", data.access_token);
+            
+            // Busca dados do usuário autenticado
+            fetch(ROBLOX_USERINFO_URL, {
+              headers: { 'Authorization': 'Bearer ' + data.access_token }
+            })
+            .then(res => res.json())
+            .then(userData => {
+              const name = userData.preferred_username || userData.name || "RobloxDev";
+              setLoggedInUser(name, data.access_token);
+              notify(`Authenticated successfully as ${name}!`, "success");
+              appendLog(`Authenticated user: ${name}`, "SUCCESS");
+            })
+            .catch(() => {
+              setLoggedInUser("RobloxUser", data.access_token);
+              notify("Authenticated with token!", "success");
+            });
+
+            // Limpa o parâmetro 'code' da URL sem recarregar a página
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } else {
+            notify("Error validating token with Roblox.", "error");
+            appendLog(`OAuth Error: ${JSON.stringify(data)}`, "ERROR");
+          }
+        })
+        .catch(err => {
+          notify("Failed to connect to Roblox authentication server.", "error");
+          appendLog(`OAuth Fetch Error: ${err.message}`, "ERROR");
+        });
+      }
+    });
+
+    // --- HANDLERS DE AÇÃO ---
     function handleCreatePlace() {
       const key = document.getElementById('place-key').value;
       const universeId = document.getElementById('place-universe-id').value;
