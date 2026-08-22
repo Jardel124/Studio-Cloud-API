@@ -381,10 +381,8 @@
 </head>
 <body>
 
-  <!-- Toast Notification Container -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- Scaled Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="brand-title">
@@ -408,7 +406,6 @@
       </li>
     </ul>
 
-    <!-- Roblox Auth Section -->
     <div class="sidebar-footer">
       <button class="btn-roblox-login" id="robloxLoginBtn">
         <span>🔴</span> <span class="nav-text">Login with Roblox</span>
@@ -424,10 +421,8 @@
     </div>
   </aside>
 
-  <!-- Main Content -->
   <main class="main-content">
     
-    <!-- PAGE 1: CREATE PLACE (DEFAULT) -->
     <section id="create-place" class="page active">
       <h1 class="page-title">Create Place</h1>
       <p class="page-subtitle">Add a new place to an existing Roblox Universe.</p>
@@ -467,7 +462,6 @@
       </div>
     </section>
 
-    <!-- PAGE 2: CREATE UNIVERSE -->
     <section id="create-universe" class="page">
       <h1 class="page-title">Create Universe</h1>
       <p class="page-subtitle">Generate new Roblox Universes automatically.</p>
@@ -502,7 +496,6 @@
       </div>
     </section>
 
-    <!-- PAGE 3: CONSOLE LOGS -->
     <section id="console-logs" class="page">
       <h1 class="page-title">Console Logs</h1>
       <p class="page-subtitle">Real-time system activity and output logs.</p>
@@ -516,18 +509,17 @@
   </main>
 
   <script>
-    // --- CONFIGURAÇÃO OAUTH ROBLOX ---
+    // --- Configs ---
     const CLIENT_ID = "https://jardel124.github.io/Studio-Cloud-API/"; 
-    const REDIRECT_URI = window.location.origin + window.location.pathname;
+    const REDIRECT_URI = "https://jardel124.github.io/Studio-Cloud-API/";
 
-    // Endpoints Oficiais Roblox OpenID Connect
     const ROBLOX_AUTH_URL = "https://apis.roblox.com/oauth/v1/authorize";
     const ROBLOX_TOKEN_URL = "https://apis.roblox.com/oauth/v1/token";
     const ROBLOX_USERINFO_URL = "https://apis.roblox.com/oauth/v1/userinfo";
 
-    // --- FUNÇÕES PKCE ---
+    // --- PKCE & STATE HELPER FUNCTIONS ---
     function dec2hex(dec) { return ('0' + dec.toString(16)).slice(-2); }
-    function generateCodeVerifier() {
+    function generateRandomString() {
       var array = new Uint32Array(56);
       window.crypto.getRandomValues(array);
       return Array.from(array, dec2hex).join('');
@@ -602,10 +594,12 @@
         return;
       }
 
-      const codeVerifier = generateCodeVerifier();
+      const codeVerifier = generateRandomString();
       const codeChallenge = await generateCodeChallenge(codeVerifier);
+      const state = generateRandomString(); // Parâmetro state exigido pelo Roblox
       
       localStorage.setItem("roblox_verifier", codeVerifier);
+      localStorage.setItem("roblox_state", state);
 
       const authUrl = `${ROBLOX_AUTH_URL}?` +
         `client_id=${CLIENT_ID}&` +
@@ -613,7 +607,8 @@
         `response_type=code&` +
         `scope=openid%20profile&` +
         `code_challenge=${codeChallenge}&` +
-        `code_challenge_method=S256`;
+        `code_challenge_method=S256&` +
+        `state=${state}`;
 
       window.location.href = authUrl;
     }
@@ -647,8 +642,16 @@
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
+      const returnedState = urlParams.get('state');
 
       if (code) {
+        const savedState = localStorage.getItem("roblox_state");
+        if (returnedState && savedState && returnedState !== savedState) {
+          notify("Security error: State parameter mismatch!", "error");
+          appendLog("OAuth Error: Invalid state parameter.", "ERROR");
+          return;
+        }
+
         notify("Processing Roblox authentication...", "info");
         appendLog("Code received from Roblox. Exchanging for token...", "INFO");
 
@@ -670,7 +673,6 @@
           if (data.access_token) {
             localStorage.setItem("roblox_token", data.access_token);
             
-            // Busca dados do usuário autenticado
             fetch(ROBLOX_USERINFO_URL, {
               headers: { 'Authorization': 'Bearer ' + data.access_token }
             })
@@ -686,7 +688,6 @@
               notify("Authenticated with token!", "success");
             });
 
-            // Limpa o parâmetro 'code' da URL sem recarregar a página
             window.history.replaceState({}, document.title, window.location.pathname);
           } else {
             notify("Error validating token with Roblox.", "error");
@@ -700,7 +701,6 @@
       }
     });
 
-    // --- HANDLERS DE AÇÃO ---
     function handleCreatePlace() {
       const key = document.getElementById('place-key').value;
       const universeId = document.getElementById('place-universe-id').value;
