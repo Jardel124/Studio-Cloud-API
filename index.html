@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Studio Cloud - Login</title>
+  <title>Studio Cloud - Dashboard</title>
   <style>
     :root {
       --bg-main: #0d1117;
@@ -377,7 +377,8 @@
 
     input[type="text"],
     input[type="number"],
-    input[type="password"] {
+    input[type="password"],
+    input[type="file"] {
       width: 100%;
       padding: clamp(8px, 1vh, 11px) 12px;
       background: var(--bg-main);
@@ -387,6 +388,11 @@
       font-size: clamp(0.82rem, 0.9vw, 0.92rem);
       outline: none;
       transition: border-color 0.2s;
+    }
+
+    input[type="file"] {
+      padding: 8px;
+      cursor: pointer;
     }
 
     input:focus {
@@ -470,6 +476,10 @@
           <span class="icon">🌌</span>
           <span class="nav-text">Create Universe</span>
         </li>
+        <li class="menu-item" onclick="switchPage('upload-asset', this)">
+          <span class="icon">📦</span>
+          <span class="nav-text">Upload Asset</span>
+        </li>
         <li class="menu-item" onclick="switchPage('console-logs', this)">
           <span class="icon">📟</span>
           <span class="nav-text">Console Logs</span>
@@ -548,6 +558,31 @@
         </div>
       </section>
 
+      <!-- UPLOAD ASSET PAGE -->
+      <section id="upload-asset" class="page">
+        <h1 class="page-title">Upload Asset (.rbxm)</h1>
+        <p class="page-subtitle">Publish model files directly to your profile or group catalog.</p>
+
+        <div class="card">
+          <div class="form-group">
+            <label>Select .rbxm File <span class="badge-req">Required</span></label>
+            <input type="file" id="asset-file" accept=".rbxm,.rbxmx" />
+          </div>
+
+          <div class="form-group">
+            <label>Asset Name <span class="badge-req">Required</span></label>
+            <input type="text" id="asset-name" placeholder="Model Name" value="Modelo via Cloud" />
+          </div>
+
+          <div class="form-group">
+            <label>Group ID (0 for Personal Profile) <span class="badge-opt">Optional</span></label>
+            <input type="text" id="asset-group-id" value="0" placeholder="0" />
+          </div>
+
+          <button class="btn-action" id="btn-upload-asset" onclick="handleUploadAsset()">Execute Upload Asset</button>
+        </div>
+      </section>
+
       <!-- CONSOLE LOGS PAGE -->
       <section id="console-logs" class="page">
         <h1 class="page-title">Console Logs</h1>
@@ -613,7 +648,6 @@
     async function handleLogin(isAutoLogin = false) {
       let cookieInput = document.getElementById('security-cookie').value.trim();
 
-      // Clean up extra wrapping quotes if present
       if ((cookieInput.startsWith('"') && cookieInput.endsWith('"')) || (cookieInput.startsWith("'") && cookieInput.endsWith("'"))) {
         cookieInput = cookieInput.slice(1, -1);
       }
@@ -629,7 +663,6 @@
       loginBtn.disabled = true;
 
       try {
-        // Request user info from the Cloudflare Worker backend
         const authRes = await callWorker({
           action: 'getUserInfo',
           cookie: cookieInput
@@ -643,11 +676,9 @@
         const actualName = authRes.username || "RobloxPlayer";
         const displayName = authRes.displayName || actualName;
 
-        // Fetch user avatar headshot thumbnail
         const thumbRes = await fetch(`https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
         const thumbData = await thumbRes.json();
         
-        // Update Sidebar fields
         document.getElementById('sidebar-displayname').innerText = displayName;
         document.getElementById('sidebar-username').innerText = `@${actualName}`;
         
@@ -665,11 +696,8 @@
         }
 
         USER_COOKIE = cookieInput;
-
-        // Save session to LocalStorage
         localStorage.setItem('sc_cookie', cookieInput);
         
-        // Toggle view
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('dashboardLayout').style.display = 'flex';
         
@@ -687,12 +715,9 @@
 
     function handleLogout() {
       USER_COOKIE = "";
-      
-      // Clear saved data
       localStorage.removeItem('sc_cookie');
       document.getElementById('security-cookie').value = "";
       
-      // Return to login screen
       document.getElementById('dashboardLayout').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'flex';
       
@@ -839,6 +864,67 @@
       btn.disabled = false;
       notify(`Finished: ${ok} successes, ${err} failures.`, ok > 0 ? "success" : "error");
       appendLog(`Create Universe task completed. Success: ${ok}, Failure: ${err}`, "INFO");
+    }
+
+    async function handleUploadAsset() {
+      const fileInput = document.getElementById('asset-file');
+      const assetName = document.getElementById('asset-name').value.trim();
+      const groupId = document.getElementById('asset-group-id').value.trim() || '0';
+
+      if (!USER_COOKIE) {
+        notify("Session expired. Please log in again.", "error");
+        handleLogout();
+        return;
+      }
+
+      if (!fileInput.files || fileInput.files.length === 0) {
+        notify("Please select a .rbxm file to upload!", "warning");
+        return;
+      }
+
+      if (!assetName) {
+        notify("Asset name is required!", "warning");
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const btn = document.getElementById('btn-upload-asset');
+      btn.disabled = true;
+
+      notify("Reading file and uploading asset...", "info");
+      appendLog(`Starting Upload Asset | File: ${file.name} | Name: ${assetName} | GroupID: ${groupId}`, "INFO");
+
+      try {
+        // Convert file to Base64 to safely transmit through JSON/Worker API
+        const reader = new FileReader();
+        const base64Data = await new Promise((resolve, reject) => {
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.onerror = error => reject(error);
+          reader.readAsDataURL(file);
+        });
+
+        const res = await callWorker({
+          action: 'uploadAsset',
+          cookie: USER_COOKIE,
+          assetName: assetName,
+          groupId: groupId,
+          fileName: file.name,
+          fileData: base64Data
+        });
+
+        if (res && res.ok) {
+          notify(`Asset uploaded successfully! ID: ${res.assetId}`, "success");
+          appendLog(`[Upload Asset] SUCCESS: Asset ID Generated -> ${res.assetId}`, "SUCCESS");
+        } else {
+          notify(`Upload failed: ${res?.message || 'Unknown error'}`, "error");
+          appendLog(`[Upload Asset] ERROR: ${res?.message || 'Unknown error'}`, "ERROR");
+        }
+      } catch (e) {
+        notify(`Connection failure: ${e.message}`, "error");
+        appendLog(`[Upload Asset] Connection failure: ${e.message}`, "ERROR");
+      } finally {
+        btn.disabled = false;
+      }
     }
   </script>
 </body>
